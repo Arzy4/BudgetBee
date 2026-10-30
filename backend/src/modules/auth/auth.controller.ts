@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { z } from "zod/mini";
+import type { AuthenticatedRequest } from "../../types/auth-request.js";
 
 import {
   registerSchema,
@@ -18,7 +19,7 @@ import {
 } from "./auth.service.js";
 
 export async function registerController(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
   // 1. Validate the incoming request
@@ -122,7 +123,7 @@ export async function loginController(
 }
 
 export async function getProfileController(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
   const userId = req.user?.id;
