@@ -3,6 +3,7 @@ import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { z } from "zod/mini";
 import type { AuthenticatedRequest } from "../../types/auth-request.js";
+import { REFRESH_COOKIE_NAME, refreshCookieOptions } from "./auth.cookie.js";
 
 import {
   registerSchema,
@@ -22,7 +23,7 @@ export async function registerController(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  // 1. Validate the incoming request
+  // Validate the incoming request
   const result = registerSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -35,17 +36,17 @@ export async function registerController(
   }
 
   try {
-    // 2. Call the registration service
+    // Call the registration service
     const user = await registerUser(result.data);
 
-    // 3. Return the created user
+    // Return the created user
     res.status(201).json({
       success: true,
       message: "User registered successfully",
       data: user,
     });
   } catch (error) {
-    // 4. Handle duplicate emails
+    // Handle duplicate emails
     if (error instanceof Error && error.message === "EMAIL_ALREADY_EXISTS") {
       res.status(409).json({
         success: false,
@@ -66,7 +67,7 @@ export async function registerController(
       return;
     }
 
-    // 5. Handle unexpected errors
+    // Handle unexpected errors
     console.error("Registration failed:", error);
 
     res.status(500).json({
@@ -80,7 +81,7 @@ export async function loginController(
   req: Request,
   res: Response,
 ): Promise<void> {
-  // 1. Validate login data
+  // Validate login data
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -93,17 +94,27 @@ export async function loginController(
   }
 
   try {
-    // 2. Call the login service
+    // Call the login service
     const loginResult = await loginUser(result.data);
 
-    // 3. Return the created user
+    // Store refresh token in an HTTP-only cookie
+    res.cookie(
+      REFRESH_COOKIE_NAME,
+      loginResult.refreshToken,
+      refreshCookieOptions,
+    );
+
+    // Return the created user
     res.status(200).json({
       success: true,
       message: "User login successfully",
-      data: loginResult,
+      data: {
+        accessToken: loginResult.accessToken,
+        user: loginResult.user,
+      },
     });
   } catch (error) {
-    // 4. Handle incorrect credentials
+    // Handle incorrect credentials
     if (error instanceof Error && error.message === "INVALID_CREDENTIALS") {
       res.status(401).json({
         success: false,
@@ -112,7 +123,7 @@ export async function loginController(
       return;
     }
 
-    // 5. Handle unexpected errors
+    // Handle unexpected errors
     console.error("Login failed:", error);
 
     res.status(500).json({
@@ -172,22 +183,39 @@ export async function getProfileController(
 }
 
 // REFRESH TOKEN CONTROLLER
-export async function refreshController(req: Request, res: Response) {
-  const result = refreshSchema.safeParse(req.body);
 
-  if (!result.success) {
-    return res.status(400).json({
-      message: "Validation failed",
-      errors: z.flattenError(result.error),
+export async function refreshController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  // Read refresh token from HTTP-only cookie
+  const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+
+  // Check whether refresh token exists
+  if (typeof refreshToken !== "string" || !refreshToken) {
+    res.status(401).json({
+      success: false,
+      message: "Refresh token is missing",
     });
+    return;
   }
 
   try {
-    const tokens = await refreshUserToken(result.data);
+    // Validate and rotate refresh token
+    const tokens = await refreshUserToken({
+      refreshToken,
+    });
 
-    return res.status(200).json({
+    // Store the newly rotated refresh token
+    res.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, refreshCookieOptions);
+
+    // Return only the new access token
+    res.status(200).json({
+      success: true,
       message: "Token refreshed successfully",
-      data: tokens,
+      data: {
+        accessToken: tokens.accessToken,
+      },
     });
   } catch (error) {
     if (
@@ -195,14 +223,17 @@ export async function refreshController(req: Request, res: Response) {
       (error.message === "INVALID_REFRESH_TOKEN" ||
         error.message === "REFRESH_TOKEN_REUSE_DETECTED")
     ) {
-      return res.status(401).json({
+      res.status(401).json({
+        success: false,
         message: "Invalid or expired refresh token",
       });
+      return;
     }
 
     console.error("Refresh token error:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
+      success: false,
       message: "Internal server error",
     });
   }

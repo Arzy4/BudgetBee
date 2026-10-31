@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 
@@ -11,12 +12,14 @@ app.use(
       "http://localhost:5173",
       "https://budget-bee-frontend-ten.vercel.app",
     ],
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
