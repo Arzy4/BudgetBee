@@ -9,7 +9,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      // Add your deployed frontend URL here later
+      "https://budget-bee-frontend-ten.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
