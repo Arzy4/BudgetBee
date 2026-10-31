@@ -7,7 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-enum AccountType {
+enum PaymentMethod {
   CASH
   BANK_TRANSFER
   E_WALLET
@@ -24,6 +24,17 @@ enum CategoryType {
   EXPENSE
 }
 
+enum CategoryName {
+  SALARY
+  GIFTS
+  INVESTMENT
+  BONUS
+  FOOD_AND_DRINKS
+  HEALTH
+  FASHION
+  TRANSPORTATION
+}
+
 model User {
   id           Int     @id @default(autoincrement())
   fullName     String
@@ -31,7 +42,6 @@ model User {
   phoneNumber  String?
   passwordHash String
 
-  accounts        Account[]
   categories      Category[]
   transactions    Transaction[]
   budgets         Budget[]
@@ -41,24 +51,6 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("users")
-}
-
-model Account {
-  id             Int         @id @default(autoincrement())
-  name           String
-  type           AccountType
-  initialBalance Decimal     @default(0) @db.Decimal(18, 2)
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  transactions Transaction[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@map("accounts")
 }
 
 model Category {
@@ -81,17 +73,16 @@ model Category {
 }
 
 model Transaction {
-  id          Int             @id @default(autoincrement())
-  description String?
-  amount      Decimal         @db.Decimal(18, 2)
-  type        TransactionType
-  date        DateTime        @default(now())
+  id            Int             @id @default(autoincrement())
+  description   String?
+  amount        Decimal         @db.Decimal(18, 2)
+  type          TransactionType
+  paymentMethod PaymentMethod?
+  date          DateTime        @default(now())
+  receiptKey    String?
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
-
-  accountId Int
-  account   Account @relation(fields: [accountId], references: [id])
 
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])
@@ -100,7 +91,6 @@ model Transaction {
   updatedAt DateTime @updatedAt
 
   @@index([userId, date])
-  @@index([accountId])
   @@index([categoryId])
   @@map("transactions")
 }

@@ -14,12 +14,13 @@ import bcrypt from "bcrypt";
 import { prisma } from "../../lib/prisma.js";
 import jwt from "jsonwebtoken";
 import { createHash, randomUUID } from "node:crypto";
+import { defaultCategories } from "../categories/default-category.service.js";
 
 // REGISTER LOGIC
 export async function registerUser(data: RegisterInput) {
   const { fullName, phoneNumber, email, password } = data;
 
-  // 1. Check whether the email is already registered
+  // Check whether the email is already registered
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
@@ -28,24 +29,37 @@ export async function registerUser(data: RegisterInput) {
     throw new Error("EMAIL_ALREADY_EXISTS");
   }
 
-  // 2. Hash the user's password
+  // Hash the user's password
   const passwordHash = await bcrypt.hash(password, 10);
 
-  // 3. Save the new user in PostgreSQL
-  const user = await prisma.user.create({
-    data: {
-      fullName,
-      phoneNumber,
-      email,
-      passwordHash,
-    },
-    select: {
-      id: true,
-      fullName: true,
-      phoneNumber: true,
-      email: true,
-      createdAt: true,
-    },
+  // Create user and categories in one database transaction
+  const user = await prisma.$transaction(async (tx) => {
+    const newUser = await tx.user.create({
+      data: {
+        fullName,
+        phoneNumber,
+        email,
+        passwordHash,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        phoneNumber: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+
+    // Automatically create eight categories
+    const result = await tx.category.createMany({
+      data: defaultCategories.map((category) => ({
+        ...category,
+        userId: newUser.id,
+      })),
+      skipDuplicates: true,
+    });
+
+    return newUser;
   });
 
   return user;

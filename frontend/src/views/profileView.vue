@@ -3,7 +3,6 @@ import {
   Settings,
   UserRound,
   UserRoundPen,
-  Wallet,
   CalendarDays,
   LockKeyhole,
   Bell,
@@ -15,7 +14,6 @@ import {
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
-import { getAccounts } from '@/services/account.service'
 
 const router = useRouter()
 
@@ -53,27 +51,6 @@ const memberSince = computed(() => {
     year: 'numeric',
     timeZone: 'UTC',
   })
-})
-
-async function fetchAccountCount() {
-  isLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    const accounts = await getAccounts()
-
-    accountCount.value = accounts.length
-  } catch (error) {
-    console.error('Failed to fetch accounts:', error)
-
-    errorMessage.value = 'Unable to load accounts'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchAccountCount()
 })
 
 async function handleLogout() {
@@ -127,18 +104,6 @@ async function handleLogout() {
 
       <!-- Account Summary -->
       <section class="mt-9 grid grid-cols-2 gap-3">
-        <div class="rounded-2xl bg-white p-4">
-          <Wallet :size="23" class="text-[#C9900B]" />
-
-          <p class="mt-3 text-xs text-[#8D857B]">My Accounts</p>
-
-          <p v-if="isLoading" class="mt-2 text-lg font-bold">...</p>
-
-          <p v-else-if="errorMessage" class="mt-2 text-lg font-bold">—</p>
-
-          <p v-else class="mt-2 text-lg font-bold">{{ accountCount }}</p>
-        </div>
-
         <div class="rounded-2xl bg-white p-4">
           <CalendarDays :size="23" class="text-[#C9900B]" />
 

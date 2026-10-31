@@ -4,10 +4,10 @@ import { authenticateToken } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 
-// Get Me
+// GET ME
 router.get("/me", authenticateToken, getProfileController);
 
-// Post
+// POST
 router.post("/register", registerController);
 router.post("/login", loginController);
 router.post("/refresh", refreshController);

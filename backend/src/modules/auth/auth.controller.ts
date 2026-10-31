@@ -21,6 +21,7 @@ import {
   logoutUser,
 } from "./auth.service.js";
 
+// Register Contoller
 export async function registerController(
   req: AuthenticatedRequest,
   res: Response,
@@ -79,6 +80,7 @@ export async function registerController(
   }
 }
 
+// Login Controller
 export async function loginController(
   req: Request,
   res: Response,
@@ -135,6 +137,7 @@ export async function loginController(
   }
 }
 
+// Get Me Controller
 export async function getProfileController(
   req: AuthenticatedRequest,
   res: Response,
@@ -185,7 +188,6 @@ export async function getProfileController(
 }
 
 // REFRESH TOKEN CONTROLLER
-
 export async function refreshController(
   req: Request,
   res: Response,

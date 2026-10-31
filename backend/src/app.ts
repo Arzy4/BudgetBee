@@ -4,7 +4,8 @@ import cookieParser from "cookie-parser";
 
 import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
-import accountRoutes from "./modules/accounts/account.routes.js";
+import transactionRoutes from "./modules/transactions/transaction.routes.js";
+import categoryRoutes from "./modules/categories/category.routes.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(cookieParser());
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/accounts", accountRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/categories", categoryRoutes);
 
 export default app;
