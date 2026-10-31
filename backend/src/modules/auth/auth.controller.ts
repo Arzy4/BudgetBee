@@ -3,13 +3,15 @@ import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { z } from "zod/mini";
 import type { AuthenticatedRequest } from "../../types/auth-request.js";
-import { REFRESH_COOKIE_NAME, refreshCookieOptions } from "./auth.cookie.js";
+import {
+  REFRESH_COOKIE_NAME,
+  refreshCookieOptions,
+  clearRefreshCookieOptions,
+} from "./auth.cookie.js";
 
 import {
   registerSchema,
   loginSchema,
-  refreshSchema,
-  logoutSchema,
 } from "./auth.schema.js";
 
 import {
@@ -240,30 +242,49 @@ export async function refreshController(
 }
 
 // LOGOUT CONTROLLER
-export async function logoutController(req: Request, res: Response) {
-  const result = logoutSchema.safeParse(req.body);
+export async function logoutController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  // Read refresh token from cookie
+  const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
 
-  if (!result.success) {
-    return res.status(400).json({
-      message: "Validation failed",
-      errors: z.flattenError(result.error),
+  // Check whether refresh token exists
+  if (typeof refreshToken !== "string" || !refreshToken) {
+    res.status(401).json({
+      success: false,
+      message: "Refresh token is missing",
     });
+    return;
   }
 
   try {
-    const response = await logoutUser(result.data);
+    // Revoke refresh session in database
+    await logoutUser({ refreshToken });
 
-    return res.status(200).json(response);
+    // Remove refresh token cookie
+    res.clearCookie(REFRESH_COOKIE_NAME, clearRefreshCookieOptions);
+
+    // Return successful response
+    res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    });
   } catch (error) {
     if (error instanceof Error && error.message === "INVALID_REFRESH_TOKEN") {
-      return res.status(401).json({
+      res.clearCookie(REFRESH_COOKIE_NAME, clearRefreshCookieOptions);
+
+      res.status(401).json({
+        success: false,
         message: "Invalid or expired refresh token",
       });
+      return;
     }
 
     console.error("Logout error:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
+      success: false,
       message: "Internal server error",
     });
   }
