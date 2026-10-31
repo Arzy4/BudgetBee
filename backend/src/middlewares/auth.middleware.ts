@@ -11,14 +11,6 @@ export async function authenticateToken(
 ): Promise<void> {
   const authHeader = req.headers.authorization;
 
-  // Temporary debugging — never log the actual token
-  console.log("Authentication debug:", {
-    authorizationPresent: Boolean(authHeader),
-    authorizationScheme: authHeader?.split(" ")[0],
-    authorizationHeaderCount: req.headersDistinct.authorization?.length ?? 0,
-    path: req.originalUrl,
-  });
-
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({
       success: false,

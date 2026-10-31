@@ -9,8 +9,9 @@ datasource db {
 
 enum AccountType {
   CASH
-  BANK
+  BANK_TRANSFER
   E_WALLET
+  CARD
 }
 
 enum TransactionType {
