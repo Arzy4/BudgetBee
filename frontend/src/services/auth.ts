@@ -41,3 +41,25 @@ export async function getCurrentUser(
 
   return response.data.data;
 }
+
+export interface RefreshTokenResponse {
+  success: boolean;
+  message: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
+export async function refreshAccessToken(
+  refreshToken: string
+): Promise<RefreshTokenResponse["data"]> {
+  const response = await api.post<RefreshTokenResponse>(
+    "/auth/refresh",
+    {
+      refreshToken,
+    }
+  );
+
+  return response.data.data;
+}

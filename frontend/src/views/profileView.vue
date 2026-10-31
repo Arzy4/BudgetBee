@@ -41,12 +41,11 @@ onMounted(async () => {
 });
 
 const memberSince = computed(() => {
-  if (!user.value?.createdAt) {
-    return "Unknown";
-  }
+  if (!user.value?.createdAt) return "Unknown";
 
-  return new Date(user.value.createdAt).toLocaleDateString("en-US", {
-    month: "short",
+  return new Date(user.value.createdAt).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
     year: "numeric",
     timeZone: "UTC",
   });
