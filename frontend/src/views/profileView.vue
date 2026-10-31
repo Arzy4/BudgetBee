@@ -12,13 +12,16 @@ import {
   LogOut,
 } from 'lucide-vue-next'
 
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from 'vue'
 
-const accountCount = 0;
-const authStore = useAuthStore();
-const isLoading = ref(true);
-const errorMessage = ref("");
+const router = useRouter()
+
+const accountCount = 0
+const authStore = useAuthStore()
+const isLoading = ref(true)
+const errorMessage = ref('')
 
 const settings = [
   { label: 'Edit Profile', icon: UserRoundPen },
@@ -27,39 +30,45 @@ const settings = [
   { label: 'Appearance', icon: Palette },
 ]
 
-const user = computed(() => authStore.user);
+const user = computed(() => authStore.user)
 
 onMounted(async () => {
   try {
-    await authStore.fetchCurrentUser();
+    await authStore.fetchCurrentUser()
   } catch (error) {
-    console.error("Failed to fetch profile:", error);
-    errorMessage.value = "Unable to load your profile.";
+    console.error('Failed to fetch profile:', error)
+    errorMessage.value = 'Unable to load your profile.'
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-});
+})
 
 const memberSince = computed(() => {
-  if (!user.value?.createdAt) return "Unknown";
+  if (!user.value?.createdAt) return 'Unknown'
 
-  return new Date(user.value.createdAt).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-});
+  return new Date(user.value.createdAt).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+})
 
-function handleLogout() {
-  // Connect to logout API later.
+async function handleLogout() {
+  try {
+    await authStore.logout()
+    await router.replace('/login')
+  } catch (error) {
+    console.error('Logout request failed:', error)
+    errorMessage.value = 'Unable to complete logout on the server. Please try again.'
+    await router.replace('/login')
+  }
 }
 </script>
 
 <template>
   <main class="min-h-svh bg-[#FFF9F0] text-[#24211D]">
     <div class="mx-auto flex min-h-svh w-full max-w-[430px] flex-col px-6 py-8">
-
       <!-- Page Header -->
       <header class="flex items-center justify-between">
         <h1 class="text-[28px] font-bold tracking-tight">My Profile</h1>
@@ -80,11 +89,11 @@ function handleLogout() {
         </div>
 
         <h2 class="mt-4 text-[22px] font-bold">
-          {{ user?.fullName ?? "Your Name" }}
+          {{ user?.fullName ?? 'Your Name' }}
         </h2>
 
         <p class="mt-1 text-sm text-[#8D857B]">
-          {{ user?.email ?? "No email available" }}
+          {{ user?.email ?? 'No email available' }}
         </p>
 
         <span

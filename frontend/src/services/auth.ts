@@ -18,7 +18,11 @@ export interface LoginResponse {
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse['data']> {
-  const response = await api.post('/auth/login', { email, password }, { withCredentials: true })
+  const response = await api.post<LoginResponse>(
+    '/auth/login',
+    { email, password },
+    { withCredentials: true },
+  )
 
   return response.data.data
 }
@@ -38,16 +42,23 @@ export interface RefreshTokenResponse {
   message: string
   data: {
     accessToken: string
-    refreshToken: string
   }
 }
 
-export async function refreshAccessToken(
-  refreshToken: string,
-): Promise<RefreshTokenResponse['data']> {
-  const response = await api.post<RefreshTokenResponse>('/auth/refresh', {
-    refreshToken,
-  })
+export async function refreshAccessToken(): Promise<RefreshTokenResponse['data']> {
+  const response = await api.post<RefreshTokenResponse>(
+    '/auth/refresh',
+    {},
+    { withCredentials: true },
+  )
 
   return response.data.data
+}
+
+export async function logout(): Promise<void> {
+  await api.post(
+    '/auth/logout',
+    {},
+    { withCredentials: true },
+  )
 }

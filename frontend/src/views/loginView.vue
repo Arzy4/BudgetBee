@@ -1,36 +1,47 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { login } from '@/services/auth'
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 import AuthInput from '@/components/auth/AuthInput.vue'
 import AuthButton from '@/components/auth/AuthButton.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
 async function handleLogin() {
   if (isLoading.value) return
 
   isLoading.value = true
   errorMessage.value = ''
-  
 
   try {
     const result = await login(email.value, password.value)
 
     // Save authenticated user and access token in Pinia
-    authStore.setAuth(result.user, result.accessToken);
+    authStore.setAuth(result.user, result.accessToken)
 
-    // Navigate to Profile
-    await router.push("/profile");
+    // Get the destination from the redirect query parameter
+    const redirect = route.query.redirect
+
+    // Only accept internal application paths
+    const destination =
+      typeof redirect === 'string' &&
+      redirect.startsWith('/') &&
+      !redirect.startsWith('//') &&
+      !redirect.startsWith('/\\')
+        ? redirect
+        : '/profile'
+
+    // Navigate to the intended destination
+    await router.replace(destination)
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       errorMessage.value = error.response?.data?.message ?? 'Unable to log in.'
@@ -97,7 +108,7 @@ async function handleLogin() {
         <p v-if="errorMessage" role="alert" class="text-center text-sm text-red-600">
           {{ errorMessage }}
         </p>
-        
+
         <AuthButton type="submit" :loading="isLoading" class="mt-7">
           {{ isLoading ? 'Logging in...' : 'Log In' }}
         </AuthButton>
