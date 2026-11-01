@@ -5,6 +5,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/loginView.vue'
 import RegisterView from '../views/registerView.vue'
 import ProfileView from '../views/profileView.vue'
+import DashboardView from '../views/dashboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,11 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('../views/dashboardView.vue'),
+    },
   ],
 })
 
@@ -55,10 +61,7 @@ router.beforeEach(async (to) => {
   }
 
   // Redirect authenticated users away from Login and Register
-  if (
-    authStore.isAuthenticated &&
-    (to.name === 'login' || to.name === 'register')
-  ) {
+  if (authStore.isAuthenticated && (to.name === 'login' || to.name === 'register')) {
     return { name: 'profile' }
   }
 

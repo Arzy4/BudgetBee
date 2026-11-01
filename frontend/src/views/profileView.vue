@@ -14,10 +14,10 @@ import {
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
+import BottomNavbar from '@/components/layout/bottomNavbar.vue'
 
 const router = useRouter()
 
-const accountCount = ref(0)
 const authStore = useAuthStore()
 const isLoading = ref(true)
 const errorMessage = ref('')
@@ -162,4 +162,7 @@ async function handleLogout() {
       </footer>
     </div>
   </main>
+
+  <!-- Bottom Navbar -->
+  <BottomNavbar />
 </template>

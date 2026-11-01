@@ -38,7 +38,7 @@ async function handleLogin() {
       !redirect.startsWith('//') &&
       !redirect.startsWith('/\\')
         ? redirect
-        : '/profile'
+        : '/dashboard'
 
     // Navigate to the intended destination
     await router.replace(destination)
