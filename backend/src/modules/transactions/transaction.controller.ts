@@ -1,5 +1,6 @@
 import { Prisma } from "../../generated/prisma/client.js";
-import type { Request, Response } from "express";
+import type { Response } from "express";
+import type { AuthenticatedRequest } from "../../types/auth-request.js";
 import { ZodError, z } from "zod";
 import { createTransactionSchema, updateTransactionSchema, } from "./transaction.schema.js";
 import {
@@ -12,7 +13,7 @@ import {
 
 // Get All Transactions Controller
 export const getAllTransactionsController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
   try {
@@ -46,7 +47,7 @@ export const getAllTransactionsController = async (
 
 // Get Transaction By ID Controller
 export const getTransactionByIdController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
   try {
@@ -106,7 +107,7 @@ export const getTransactionByIdController = async (
 
 // Create Transaction Controller
 export const createTransactionController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
   try {
@@ -169,7 +170,7 @@ export const createTransactionController = async (
 
  // Update Transaction By ID Controller
 export const updateTransactionController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
   try {
@@ -276,7 +277,7 @@ export const updateTransactionController = async (
 
  // Delete Transaction By ID Controller
 export const deleteTransactionController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
   try {
