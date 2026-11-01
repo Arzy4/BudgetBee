@@ -5,7 +5,8 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/loginView.vue'
 import RegisterView from '../views/registerView.vue'
 import ProfileView from '../views/profileView.vue'
-import DashboardView from '../views/dashboardView.vue'
+import dashboardView from '../views/dashboardView.vue'
+import addTransactionView from '../views/addTransactionView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,7 +37,13 @@ const router = createRouter({
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: () => import('../views/dashboardView.vue'),
+      component: dashboardView,
+    },
+    {
+      path: '/transactions/add',
+      name: 'add-transaction',
+      component: addTransactionView,
+      meta: { requiresAuth: true },
     },
   ],
 })

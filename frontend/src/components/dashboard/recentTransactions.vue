@@ -144,7 +144,7 @@ const getIconStyle = (category: string) => {
       <div
         v-for="transaction in recentTransactions"
         :key="transaction.id"
-        class="flex items-center gap-3 py-3 first:pt-0 last:pb-0 border-t-1"
+        class="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
       >
         <!-- Category Icon -->
         <div

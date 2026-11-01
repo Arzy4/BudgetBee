@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import axios from 'axios'
-import { getAllTransactions } from '@/services/transactions'
+import { getAllTransactions } from '@/services/transactions/transactions'
 import type { Transaction } from '@/types/transaction'
 
 export const useTransactionStore = defineStore('transactions', () => {

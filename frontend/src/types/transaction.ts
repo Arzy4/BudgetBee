@@ -32,3 +32,14 @@ export interface GetTransactionsResponse {
   message: string
   data: Transaction[]
 }
+
+export interface CreateTransactionPayload {
+  title: string
+  amount: number
+  type: TransactionType
+  categoryId: number
+  paymentMethod?: PaymentMethod
+  date: string
+  description?: string
+  receiptFile?: File | null
+}
