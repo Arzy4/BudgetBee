@@ -1,8 +1,8 @@
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
-import type { 
-  CreateTransactionInput, 
-  UpdateTransactionInput, 
+import type {
+  CreateTransactionInput,
+  UpdateTransactionInput,
 } from "./transaction.schema.js";
 
 // Get All Transactions Logic
@@ -91,9 +91,10 @@ export const createTransaction = async (
   const transaction = await prisma.transaction.create({
     data: {
       userId,
-      categoryId: data.categoryId,
-      type: data.type,
+      title: data.title,
       amount: new Prisma.Decimal(data.amount.toString()),
+      type: data.type,
+      categoryId: data.categoryId,
       paymentMethod: data.paymentMethod,
       description: data.description,
       date: data.date ? new Date(data.date) : new Date(),
@@ -112,8 +113,7 @@ export const createTransaction = async (
   return transaction;
 };
 
-
- // Update Transaction Logic
+// Update Transaction Logic
 export const updateTransaction = async (
   userId: number,
   transactionId: number,
@@ -138,8 +138,7 @@ export const updateTransaction = async (
 
   // Determine the final transaction type and category
   const finalType = data.type ?? existingTransaction.type;
-  const finalCategoryId =
-    data.categoryId ?? existingTransaction.categoryId;
+  const finalCategoryId = data.categoryId ?? existingTransaction.categoryId;
 
   // Verify that the category belongs to the user
   const category = await prisma.category.findFirst({
@@ -165,6 +164,9 @@ export const updateTransaction = async (
       userId,
     },
     data: {
+      ...(data.title !== undefined && {
+        title: data.title,
+      }),
       ...(data.amount !== undefined && {
         amount: new Prisma.Decimal(data.amount.toString()),
       }),
@@ -199,7 +201,7 @@ export const updateTransaction = async (
   return updatedTransaction;
 };
 
- // Delete Transaction Logic
+// Delete Transaction Logic
 export const deleteTransaction = async (
   userId: number,
   transactionId: number,

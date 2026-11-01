@@ -1,6 +1,12 @@
 import { z } from "zod";
 
 export const createTransactionSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, "Transaction title is required")
+    .max(100, "Transaction title cannot exceed 100 characters"),
+
   amount: z
     .number()
     .positive("Amount must be greater than zero")

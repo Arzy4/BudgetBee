@@ -80,6 +80,7 @@ model Transaction {
   paymentMethod PaymentMethod?
   date          DateTime        @default(now())
   receiptKey    String?
+  title         String?
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
