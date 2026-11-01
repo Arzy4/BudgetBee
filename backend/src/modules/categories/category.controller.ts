@@ -1,6 +1,6 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
+import type { AuthenticatedRequest } from "../../types/auth-request.js";
 import { ZodError } from "zod";
-
 import { createCategorySchema } from "./category.schema.js";
 import {
   createCategory,
@@ -9,7 +9,7 @@ import {
 
 // Create Category Controller
 export const createCategoryController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
   try {
