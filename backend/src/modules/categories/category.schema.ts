@@ -1,32 +1,29 @@
 import { z } from "zod";
 
-export const createCategorySchema = z
-  .object({
-    name: z.enum([
-      "SALARY",
-      "GIFTS",
-      "INVESTMENT",
-      "BONUS",
-      "FOOD_AND_DRINKS",
-      "HEALTH",
-      "FASHION",
-      "TRANSPORTATION",
-    ]),
+const categoryBaseSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Category name is required")
+    .max(100, "Category name cannot exceed 100 characters"),
 
-    type: z.enum(["INCOME", "EXPENSE"]),
-  })
-  .refine(
-    (data) => {
-      const incomeCategories = ["SALARY", "GIFTS", "INVESTMENT", "BONUS"];
+  type: z.enum(["INCOME", "EXPENSE"]),
+});
 
-      const isIncomeCategory = incomeCategories.includes(data.name);
+// Create Category
+export const createCategorySchema = categoryBaseSchema;
 
-      return data.type === (isIncomeCategory ? "INCOME" : "EXPENSE");
-    },
-    {
-      message: "Category name does not match transaction type",
-      path: ["type"],
-    },
-  );
+// Update Category
+export const updateCategorySchema = categoryBaseSchema
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field is required",
+  });
 
-export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
+export type CreateCategoryInput = z.infer<
+  typeof createCategorySchema
+>;
+
+export type UpdateCategoryInput = z.infer<
+  typeof updateCategorySchema
+>;

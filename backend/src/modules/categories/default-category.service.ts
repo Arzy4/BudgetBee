@@ -3,14 +3,14 @@ import type { Prisma } from "../../generated/prisma/client.js";
 
 // Default categories for every new user
 export const defaultCategories = [
-  { name: "Salary", type: "INCOME" },
-  { name: "Gifts", type: "INCOME" },
-  { name: "Investment", type: "INCOME" },
-  { name: "Bonus", type: "INCOME" },
-  { name: "Food & Drinks", type: "EXPENSE" },
-  { name: "Health", type: "EXPENSE" },
-  { name: "Fashion", type: "EXPENSE" },
-  { name: "Transportation", type: "EXPENSE" },
+  { name: "SALARY", type: "INCOME" },
+  { name: "GIFTS", type: "INCOME" },
+  { name: "INVESTMENT", type: "INCOME" },
+  { name: "BONUS", type: "INCOME" },
+  { name: "FOOD & DRINKS", type: "EXPENSE" },
+  { name: "HEALTH", type: "EXPENSE" },
+  { name: "FASHION", type: "EXPENSE" },
+  { name: "TRANSPORTATION", type: "EXPENSE" },
 ] satisfies Omit<Prisma.CategoryCreateManyInput, "userId">[];
 
 // Insert default categories for a specific user
