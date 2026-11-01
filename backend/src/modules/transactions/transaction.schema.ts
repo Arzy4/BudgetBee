@@ -22,4 +22,13 @@ export const createTransactionSchema = z.object({
   date: z.iso.datetime({ offset: true }).optional(),
 });
 
+// Update Transaction Schema
+export const updateTransactionSchema = createTransactionSchema
+  .partial()
+  .refine(
+    (data) => Object.keys(data).length > 0,
+    "At least one field must be provided",
+  );
+
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;
