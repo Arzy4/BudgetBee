@@ -279,7 +279,7 @@ async function confirmDelete() {
             type="text"
             maxlength="100"
             placeholder="e.g. Entertainment"
-            class="w-full rounded-xl bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-amber-400"
+            class="w-full rounded-xl bg-white p-3 text-sm font-medium text-stone-700 outline-none focus:ring-2 focus:ring-amber-400"
           />
         </div>
 
@@ -299,7 +299,7 @@ async function confirmDelete() {
               aria-labelledby="manager-category-type-label"
               aria-haspopup="listbox"
               :aria-expanded="isTypeDropdownOpen"
-              class="flex w-full items-center justify-between rounded-xl bg-white p-3 text-left text-sm text-stone-800 outline-none focus:ring-2 focus:ring-amber-400"
+              class="flex w-full items-center justify-between rounded-xl bg-white p-3 text-left text-sm font-medium text-stone-700 outline-none focus:ring-2 focus:ring-amber-400"
               @click="isTypeDropdownOpen = !isTypeDropdownOpen"
             >
               <span>{{ categoryType }}</span>
@@ -324,7 +324,7 @@ async function confirmDelete() {
                 type="button"
                 role="option"
                 :aria-selected="categoryType === option.value"
-                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm text-stone-700 transition hover:bg-amber-100"
+                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium text-stone-700 transition hover:bg-amber-100"
                 :class="categoryType === option.value ? 'bg-amber-100 font-semibold' : ''"
                 @click="selectCategoryType(option.value)"
               >

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { useTransactionStore } from '@/stores/transactions'
 import { Doughnut } from 'vue-chartjs'
@@ -18,6 +19,75 @@ ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 const transactionStore = useTransactionStore()
 
 const { selectedMonth, monthlyTransactions } = storeToRefs(transactionStore)
+const isMonthDropdownOpen = ref(false)
+
+const months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+
+const parseSelectedMonth = () => {
+  const [year, month] = selectedMonth.value.split('-').map(Number)
+
+  const now = new Date()
+
+  return {
+    year: year && year > 0 ? year : now.getFullYear(),
+    month: month && month >= 1 && month <= 12
+      ? month
+      : now.getMonth() + 1,
+  }
+}
+
+const initialPeriod = parseSelectedMonth()
+
+const temporaryMonth = ref(initialPeriod.month)
+const temporaryYear = ref(initialPeriod.year)
+
+const selectedPeriodLabel = computed(() => {
+  const { year, month } = parseSelectedMonth()
+
+  return `${months[month - 1]} ${year}`
+})
+
+const openMonthDropdown = () => {
+  const { year, month } = parseSelectedMonth()
+
+  temporaryMonth.value = month
+  temporaryYear.value = year
+
+  isMonthDropdownOpen.value = true
+}
+
+const closeMonthDropdown = () => {
+  isMonthDropdownOpen.value = false
+}
+
+const toggleMonthDropdown = () => {
+  if (isMonthDropdownOpen.value) {
+    closeMonthDropdown()
+  } else {
+    openMonthDropdown()
+  }
+}
+
+const applyMonth = () => {
+  const month = String(temporaryMonth.value).padStart(2, '0')
+
+  selectedMonth.value = `${temporaryYear.value}-${month}`
+
+  closeMonthDropdown()
+}
 
 const totalIncome = computed(() => {
   return monthlyTransactions.value
@@ -142,15 +212,99 @@ const chartOptions: ChartOptions<'doughnut'> = {
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-stone-900">Financial Overview</h1>
 
-        <p class="text-sm text-stone-500">Here's your income and expenses this month</p>
+        <p class="text-sm text-stone-500 max-w-[90%]">Here's your income and expenses this month</p>
       </div>
 
-      <input
-        v-model="selectedMonth"
-        type="month"
-        aria-label="Select month"
-        class="max-w-32 rounded-full bg-white/40 px-3 py-2 text-xs text-stone-800 outline-none backdrop-blur-md"
-      />
+      <!-- Custom Month Selector -->
+      <div class="relative shrink-0">
+        <button
+          type="button"
+          aria-label="Select financial overview month"
+          :aria-expanded="isMonthDropdownOpen"
+          class="flex items-center gap-2 rounded-full bg-white/50 px-3 py-2 text-xs font-semibold text-stone-800 shadow-sm backdrop-blur-md transition-colors hover:bg-amber-100"
+          @click="isMonthDropdownOpen ? closeMonthDropdown() : openMonthDropdown()"
+        >
+          <CalendarDays :size="15" class="shrink-0 text-amber-700" />
+
+          <span class="whitespace-nowrap">
+            {{ selectedPeriodLabel }}
+          </span>
+
+          <ChevronDown
+            :size="15"
+            class="shrink-0 text-amber-700 transition-transform"
+            :class="isMonthDropdownOpen ? 'rotate-180' : ''"
+          />
+        </button>
+
+        <!-- Dropdown Panel -->
+        <div
+          v-if="isMonthDropdownOpen"
+          class="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/80 bg-[#FFF8ED] p-4 shadow-xl"
+        >
+          <!-- Year Navigation -->
+          <div class="mb-4 flex items-center justify-between">
+            <button
+              type="button"
+              aria-label="Previous year"
+              class="rounded-xl bg-white p-2 text-amber-700 hover:bg-amber-100"
+              @click="temporaryYear--"
+            >
+              <ChevronLeft :size="18" />
+            </button>
+
+            <span class="text-sm font-bold text-stone-800">
+              {{ temporaryYear }}
+            </span>
+
+            <button
+              type="button"
+              aria-label="Next year"
+              class="rounded-xl bg-white p-2 text-amber-700 hover:bg-amber-100"
+              @click="temporaryYear++"
+            >
+              <ChevronRight :size="18" />
+            </button>
+          </div>
+
+          <!-- Month Grid -->
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              v-for="(month, index) in months"
+              :key="month"
+              type="button"
+              class="rounded-xl px-2 py-3 text-xs font-medium transition-colors"
+              :class="
+                temporaryMonth === index + 1
+                  ? 'bg-[#FFBA08] font-bold text-stone-900'
+                  : 'bg-white text-stone-600 hover:bg-amber-100'
+              "
+              @click="temporaryMonth = index + 1"
+            >
+              {{ month.slice(0, 3) }}
+            </button>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-5 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              class="rounded-full border border-stone-200 bg-white py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50"
+              @click="closeMonthDropdown"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="rounded-full bg-[#FFBA08] py-2.5 text-xs font-bold text-stone-900 hover:bg-amber-400"
+              @click="applyMonth"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Overview Card -->

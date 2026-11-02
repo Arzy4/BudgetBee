@@ -9,6 +9,7 @@ import dashboardView from '../views/dashboardView.vue'
 import addTransactionView from '../views/addTransactionView.vue'
 import budgetView from '../views/budgetView.vue'
 import historyView from '../views/historyView.vue'
+import transactionDetailView from '../views/transactionDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +63,12 @@ const router = createRouter({
       component: historyView,
       meta: { requiresAuth: true },
     },
+    {
+      path: '/transactions/:id',
+      name: 'transaction-detail',
+      component: transactionDetailView,
+      meta: { requiresAuth: true },
+    },  
   ],
 })
 

@@ -20,7 +20,7 @@ const navigationItems = [
   },
   {
     name: 'History',
-    path: '/transactions',
+    path: '/histories',
     icon: List,
   },
   {

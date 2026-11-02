@@ -2,12 +2,28 @@ import api from '@/services/api'
 import type { CreateTransactionPayload } from '@/types/transaction'
 
 // Interface
-interface TransactionListResponse {
-  success: boolean
-  message: string
-  data: {
+export interface ApiTransaction {
+  id: number
+  title: string
+  description: string | null
+  amount: string
+  type: 'INCOME' | 'EXPENSE'
+  paymentMethod: string
+  date: string
+  receiptKey: string | null
+  categoryId: number
+  createdAt: string
+  updatedAt: string
+  category: {
     id: number
-  }[]
+    name: string
+    type: 'INCOME' | 'EXPENSE'
+  }
+}
+
+interface TransactionListResponse {
+  message: string
+  data: ApiTransaction[]
 }
 
 // Exported Functions
