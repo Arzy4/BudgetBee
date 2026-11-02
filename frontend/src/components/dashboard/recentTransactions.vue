@@ -27,7 +27,7 @@ const recentTransactions = computed(() => {
         new Date(b.date).getTime() -
         new Date(a.date).getTime(),
     )
-    .slice(0, 4)
+    .slice(0, 2)
 })
 
 // Format currency

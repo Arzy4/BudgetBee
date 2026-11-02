@@ -17,8 +17,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 
 const transactionStore = useTransactionStore()
 
-const { selectedMonth, monthlyTransactions } =
-  storeToRefs(transactionStore)
+const { selectedMonth, monthlyTransactions } = storeToRefs(transactionStore)
 
 const totalIncome = computed(() => {
   return monthlyTransactions.value
@@ -210,28 +209,26 @@ const chartOptions: ChartOptions<'doughnut'> = {
       </div>
 
       <!-- Category Breakdown -->
-      <div class="mt-4 grid grid-cols-2 gap-4">
+      <div class="mt-4 flex flex-wrap justify-center gap-x-3 gap-y-4 px-2">
         <div
-          v-for="(category, index) in categories"
+          v-for="category in categories"
           :key="category.name"
-          class="flex flex-col items-center gap-1"
-          :class="{
-            'col-span-2 justify-self-center':
-              categories.length % 2 !== 0 && index === categories.length - 1,
-          }"
+          class="flex max-w-[120px] min-w-0 flex-col items-center gap-1 text-center"
         >
-          <div class="flex items-center gap-2">
+          <!-- Category Name -->
+          <div class="flex min-w-0 max-w-full items-center justify-center gap-1.5">
             <span
-              class="h-3 w-3 shrink-0 rounded-full"
+              class="h-2.5 w-2.5 shrink-0 rounded-full"
               :style="{ backgroundColor: category.color }"
-            />
+            ></span>
 
-            <span class="text-xs text-stone-500">
+            <span class="min-w-0 break-words text-[10px] leading-tight font-medium text-stone-500">
               {{ category.name }}
             </span>
           </div>
 
-          <p class="text-sm font-semibold text-stone-800">
+          <!-- Category Amount -->
+          <p class="max-w-full break-words text-[10px] leading-tight font-semibold text-stone-800">
             {{ formatCurrency(category.amount) }}
           </p>
         </div>

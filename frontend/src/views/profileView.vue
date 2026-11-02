@@ -4,6 +4,7 @@ import {
   UserRound,
   UserRoundPen,
   CalendarDays,
+  ReceiptText,
   LockKeyhole,
   Bell,
   Palette,
@@ -15,12 +16,14 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
 import BottomNavbar from '@/components/layout/bottomNavbar.vue'
+import { getTransactions } from '@/services/transactions/transactionService'
 
 const router = useRouter()
 
 const authStore = useAuthStore()
 const isLoading = ref(true)
 const errorMessage = ref('')
+const totalTransactions = ref<number | null>(null)
 
 const settings = [
   { label: 'Edit Profile', icon: UserRoundPen },
@@ -33,7 +36,7 @@ const user = computed(() => authStore.user)
 
 onMounted(async () => {
   try {
-    await authStore.fetchCurrentUser()
+    await Promise.all([authStore.fetchCurrentUser(), fetchTransactionCount()])
   } catch (error) {
     console.error('Failed to fetch profile:', error)
     errorMessage.value = 'Unable to load your profile.'
@@ -52,6 +55,20 @@ const memberSince = computed(() => {
     timeZone: 'UTC',
   })
 })
+
+async function fetchTransactionCount() {
+  isLoading.value = true
+
+  try {
+    const transactions = await getTransactions()
+    totalTransactions.value = transactions.length
+  } catch (error) {
+    console.error('Failed to fetch transactions:', error)
+    totalTransactions.value = null
+  } finally {
+    isLoading.value = false
+  }
+}
 
 async function handleLogout() {
   try {
@@ -104,16 +121,42 @@ async function handleLogout() {
 
       <!-- Account Summary -->
       <section class="mt-9 grid grid-cols-2 gap-3">
-        <div class="rounded-2xl bg-white p-4">
-          <CalendarDays :size="23" class="text-[#C9900B]" />
+        <!-- Member Since -->
+        <div class="flex flex-col rounded-2xl bg-white p-4">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+            <CalendarDays :size="22" class="text-amber-600" />
+          </div>
 
-          <p class="mt-3 text-xs text-[#8D857B]">Member Since</p>
+          <p class="text-xs text-stone-400">Member Since</p>
 
-          <p v-if="isLoading" class="mt-2 text-lg font-bold">...</p>
+          <p class="mt-1 text-sm font-semibold text-stone-900">
+            {{
+              isLoading
+                ? 'Loading...'
+                : memberSince === null
+                  ? 'Unavailable'
+                  : `${memberSince}`
+            }}
+          </p>
+        </div>
 
-          <p v-else-if="errorMessage" class="mt-2 text-lg font-bold">—</p>
+        <!-- Total Transactions -->
+        <div class="flex flex-col rounded-2xl bg-white p-4">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+            <ReceiptText :size="22" class="text-amber-600" />
+          </div>
 
-          <p v-else class="mt-2 text-lg font-bold">{{ memberSince }}</p>
+          <p class="text-xs text-stone-400">Transactions</p>
+
+          <p class="mt-1 text-sm font-semibold text-stone-900">
+            {{
+              isLoading
+                ? 'Loading...'
+                : totalTransactions === null
+                  ? 'Unavailable'
+                  : `${totalTransactions} recorded`
+            }}
+          </p>
         </div>
       </section>
 
