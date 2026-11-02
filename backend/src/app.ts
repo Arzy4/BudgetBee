@@ -6,6 +6,7 @@ import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import transactionRoutes from "./modules/transactions/transaction.routes.js";
 import categoryRoutes from "./modules/categories/category.routes.js";
+import budgetRoutes from './modules/budgets/budget.routes.js'
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/budgets", budgetRoutes);
 
 export default app;
