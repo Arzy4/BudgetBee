@@ -148,7 +148,7 @@ const getIconStyle = (category: string) => {
       >
         <!-- Category Icon -->
         <div
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full mt-3"
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full my-2"
           :style="getIconStyle(transaction.category.name)"
         >
           <component

@@ -2,8 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import axios from 'axios'
 import { X, Plus, Pencil, Trash2, ArrowLeft, ChevronDown, Check } from 'lucide-vue-next'
-import { createCategory, updateCategory, deleteCategory } from '@/services/categoryService'
-import type { Category, CategoryType } from '@/services/categoryService'
+import { createCategory, updateCategory, deleteCategory } from '@/services/categories/categoryService'
+import type { Category, CategoryType } from '@/services/categories/categoryService'
 
 const props = defineProps<{
   categories: Category[]

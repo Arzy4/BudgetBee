@@ -6,8 +6,8 @@ import axios from 'axios'
 import { createTransaction } from '@/services/transactions/transactionService'
 import TransactionForm from '@/components/transactions/transactionForm.vue'
 import type { CreateTransactionPayload } from '@/types/transaction'
-import { getCategories } from '@/services/categoryService'
-import type { Category } from '@/services/categoryService'
+import { getCategories } from '@/services/categories/categoryService'
+import type { Category } from '@/services/categories/categoryService'
 import CategoryManager from '@/components/categories/categoryManager.vue'
 
 const router = useRouter()

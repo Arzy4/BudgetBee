@@ -7,6 +7,8 @@ import RegisterView from '../views/registerView.vue'
 import ProfileView from '../views/profileView.vue'
 import dashboardView from '../views/dashboardView.vue'
 import addTransactionView from '../views/addTransactionView.vue'
+import budgetView from '../views/budgetView.vue'
+import historyView from '../views/historyView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,11 +40,26 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: dashboardView,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: '/transactions/add',
       name: 'add-transaction',
       component: addTransactionView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/budgets',
+      name: 'budgets',
+      component: budgetView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/histories',
+      name: 'histories',
+      component: historyView,
       meta: { requiresAuth: true },
     },
   ],

@@ -202,9 +202,24 @@ const chartOptions: ChartOptions<'doughnut'> = {
         >
           <p class="text-xs text-stone-500">Net Income</p>
 
-          <p class="text-md font-bold text-stone-900">
-            {{ formatCurrency(netIncome) }}
-          </p>
+          <div class="mt-1 flex items-center justify-center gap-1.5">
+            <!-- Net Income Amount -->
+            <p class="text-sm font-bold text-stone-900">
+              {{ formatCurrency(netIncome) }}
+            </p>
+
+            <!-- Positive: Solid Green Triangle -->
+            <span
+              v-if="netIncome > 0"
+              class="h-0 w-0 shrink-0 border-x-[7px] border-b-[12px] border-x-transparent border-b-green-600"
+            ></span>
+
+            <!-- Negative: Solid Red Triangle -->
+            <span
+              v-else-if="netIncome < 0"
+              class="h-0 w-0 shrink-0 border-x-[7px] border-t-[12px] border-x-transparent border-t-red-600"
+            ></span>
+          </div>
         </div>
       </div>
 
