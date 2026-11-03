@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
-import { Prisma } from "../../generated/prisma/client.js";
-import { prisma } from "../../lib/prisma.js";
+import { Prisma } from "../../generated/prisma/client.js";;
 import { z } from "zod/mini";
 import type { AuthenticatedRequest } from "../../types/auth-request.js";
 import {
@@ -129,56 +128,6 @@ export async function loginController(
 
     // Handle unexpected errors
     console.error("Login failed:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-}
-
-// Get Me Controller
-export async function getProfileController(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-    return;
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-      },
-    });
-
-    if (!user) {
-      res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Profile retrieved successfully",
-      data: user,
-    });
-  } catch (error) {
-    console.error("Get profile failed:", error);
 
     res.status(500).json({
       success: false,
