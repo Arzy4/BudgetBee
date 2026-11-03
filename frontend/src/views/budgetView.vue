@@ -389,7 +389,7 @@ onMounted(fetchBudgets)
           <p class="mt-1 text-sm text-stone-500">Plan your spending wisely</p>
         </div>
 
-        <div class="rounded-2xl bg-white/40 p-3 shadow-sm backdrop-blur-md">
+        <div class="flex p-3 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm">
           <CalendarDays :size="22" class="text-amber-600" />
         </div>
       </header>

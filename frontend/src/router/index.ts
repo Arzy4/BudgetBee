@@ -10,6 +10,7 @@ import addTransactionView from '../views/addTransactionView.vue'
 import budgetView from '../views/budgetView.vue'
 import historyView from '../views/historyView.vue'
 import transactionDetailView from '../views/transactionDetailView.vue'
+import editProfileView from '../views/editProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -49,26 +50,42 @@ const router = createRouter({
       path: '/transactions/add',
       name: 'add-transaction',
       component: addTransactionView,
-      meta: { requiresAuth: true },
+      meta: { 
+        requiresAuth: true 
+      },
     },
     {
       path: '/budgets',
       name: 'budgets',
       component: budgetView,
-      meta: { requiresAuth: true },
+      meta: { 
+        requiresAuth: true 
+      },
     },
     {
       path: '/histories',
       name: 'histories',
       component: historyView,
-      meta: { requiresAuth: true },
+      meta: { 
+        requiresAuth: true 
+      },
     },
     {
       path: '/transactions/:id',
       name: 'transaction-detail',
       component: transactionDetailView,
-      meta: { requiresAuth: true },
-    },  
+      meta: { 
+        requiresAuth: true 
+      },
+    },
+    {
+      path: '/profile/edit',
+      name: 'edit-profile',
+      component: editProfileView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
   ],
 })
 

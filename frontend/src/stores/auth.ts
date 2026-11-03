@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { AuthUser } from '@/services/auth'
 import { getCurrentUser, refreshAccessToken, logout as logoutRequest } from '@/services/auth'
+import { updateProfile } from '@/services/users/userService'
+import type { UpdateProfilePayload } from '@/services/users/userService'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -39,6 +41,20 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = currentUser
 
     return currentUser
+  }
+
+  async function saveProfile(payload: UpdateProfilePayload) {
+    if (!accessToken.value) {
+      throw new Error('No access token available')
+    }
+
+    // Send the updated information to the backend
+    const updatedUser = await updateProfile(payload)
+
+    // Synchronize the Pinia store with the updated user
+    user.value = updatedUser
+
+    return updatedUser
   }
 
   async function restoreSession(): Promise<boolean> {
@@ -101,6 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
     setAuth,
     clearAuth,
     fetchCurrentUser,
+    saveProfile,
     restoreSession,
     logout,
   }

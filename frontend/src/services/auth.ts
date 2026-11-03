@@ -28,7 +28,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 }
 
 export async function getCurrentUser(accessToken: string): Promise<AuthUser> {
-  const response = await api.get('/auth/me', {
+  const response = await api.get('/users/me', {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

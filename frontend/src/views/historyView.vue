@@ -397,7 +397,7 @@ const selectedPaymentMethodLabel = computed(
           <p class="mt-1 text-sm text-stone-500">Track every transaction</p>
         </div>
 
-        <div class="rounded-2xl bg-amber-100 p-3">
+        <div class="flex p-3 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm">
           <History :size="22" class="text-amber-700" />
         </div>
       </header>
