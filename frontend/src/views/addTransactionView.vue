@@ -93,7 +93,7 @@ function formatCurrency(amount: number) {
 
 <template>
   <main
-    class="flex h-svh flex-col overflow-hidden bg-cover bg-center bg-no-repeat px-4 py-4 pb-10"
+    class="flex h-svh flex-col overflow-hidden bg-cover bg-center bg-no-repeat px-5 py-9 pb-10"
     style="background-image: url('/images/dashboard-bg.png')"
   >
     <div class="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">

@@ -127,7 +127,7 @@ const getIconStyle = (category: string) => {
     </div>
 
     <!-- Loading State -->
-    <p v-if="isLoading" class="py-8 text-center text-sm text-stone-500">Loading transactions...</p>
+    <p v-if="isLoading" class="flex justify-center items-center h-full pb-17 text-center text-sm text-stone-500">Loading transactions...</p>
 
     <!-- Error State -->
     <p v-else-if="errorMessage" role="alert" class="py-8 text-center text-sm text-red-500">

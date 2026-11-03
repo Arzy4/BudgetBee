@@ -474,7 +474,7 @@ const selectedPaymentMethodLabel = computed(
       <!-- Transaction List -->
       <section class="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pb-4">
         <!-- Loading State -->
-        <div v-if="isLoading" class="rounded-2xl bg-white/40 p-8 text-center backdrop-blur-md">
+        <div v-if="isLoading" class="flex justify-center items-center h-full pb-12">
           <p class="text-sm text-stone-500">Loading transactions...</p>
         </div>
 

@@ -26,7 +26,23 @@ interface TransactionListResponse {
   data: ApiTransaction[]
 }
 
+export interface UpdateTransactionPayload {
+  title?: string
+  amount?: number
+  type?: 'INCOME' | 'EXPENSE'
+  categoryId?: number
+  paymentMethod?: 'CASH' | 'BANK_TRANSFER' | 'E_WALLET' | 'CARD'
+  description?: string
+  date?: string
+}
+
+interface TransactionResponse {
+  message: string
+  data: ApiTransaction
+}
+
 // Exported Functions
+/* Create Transaction */
 export async function createTransaction(
   payload: CreateTransactionPayload,
 ) {
@@ -37,9 +53,47 @@ export async function createTransaction(
   return response.data
 }
 
+
+/* Get Transaction */
 export async function getTransactions() {
   const response = await api.get<TransactionListResponse>(
     '/transactions',
+  )
+
+  return response.data.data
+}
+
+/* Get Transaction By ID */
+export async function getTransactionById(
+  id: number,
+): Promise<ApiTransaction> {
+  const response = await api.get<TransactionResponse>(
+    `/transactions/${id}`,
+  )
+
+  return response.data.data
+}
+
+
+/* Update Transaction By ID */
+export async function updateTransaction(
+  id: number,
+  payload: UpdateTransactionPayload,
+): Promise<ApiTransaction> {
+  const response = await api.patch<TransactionResponse>(
+    `/transactions/${id}`,
+    payload,
+  )
+
+  return response.data.data
+}
+
+// Delete Transaction By ID
+export async function deleteTransaction(
+  id: number,
+): Promise<ApiTransaction> {
+  const response = await api.delete<TransactionResponse>(
+    `/transactions/${id}`,
   )
 
   return response.data.data

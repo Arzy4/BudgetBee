@@ -15,7 +15,7 @@ onMounted(() => {
 
 <template>
   <main
-    class="relative min-h-screen w-full bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 py-8"
+    class="relative min-h-screen w-full bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 py-9"
     style="background-image: url('/images/dashboard-bg.png')"
   >
     <!-- Dashboard Content -->

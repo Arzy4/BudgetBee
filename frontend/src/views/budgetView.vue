@@ -511,9 +511,7 @@ onMounted(fetchBudgets)
 
         <!-- Loading State -->
         <div v-if="isLoading" class="flex h-full flex-col items-center justify-center gap-4">
-          <div class="h-12 w-12 animate-pulse rounded-full bg-stone-100"></div>
-          <div class="h-4 w-40 animate-pulse rounded bg-stone-100"></div>
-          <div class="h-3 w-28 animate-pulse rounded bg-stone-100"></div>
+          <p class="pb-10 text-center text-sm text-stone-500">Loading budgets...</p>
         </div>
 
         <!-- Error State -->
