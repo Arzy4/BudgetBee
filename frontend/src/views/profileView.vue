@@ -145,9 +145,18 @@ function handleSettingClick(route: string | null) {
         >
           <!-- Avatar -->
           <div
-            class="flex h-20 w-20 items-center justify-center rounded-3xl bg-[#FFBA08] shadow-sm"
+            class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-amber-400"
           >
-            <UserRound :size="40" :stroke-width="1.7" class="text-stone-900" />
+            <!-- Display uploaded profile picture -->
+            <img
+              v-if="authStore.user?.profileImage"
+              :src="authStore.user.profileImage"
+              alt="Profile picture"
+              class="h-full w-full object-cover"
+            />
+
+            <!-- Display default avatar if no image exists -->
+            <UserRound v-else :size="44" :stroke-width="1.7" class="text-stone-900" />
           </div>
 
           <!-- Full Name -->

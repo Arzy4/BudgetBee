@@ -2,7 +2,7 @@
 import { ArrowLeft, UserRound, Save, LockKeyhole, Camera, CheckCircle2, X } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import axios from 'axios'
 
 const router = useRouter()
@@ -16,12 +16,17 @@ const phoneNumberError = ref('')
 const profileImage = ref<string | null>(null)
 const imageInput = ref<HTMLInputElement | null>(null)
 const imageError = ref('')
+const selectedImageFile = ref<File | null>(null)
 
 const isSubmitting = ref(false)
 const submitError = ref('')
 const showSuccessModal = ref(false)
 
 const isLoadingProfile = ref(true)
+
+const displayedProfileImage = computed(() => {
+  return profileImage.value || authStore.user?.profileImage || null
+})
 
 function closeSuccessModal() {
   showSuccessModal.value = false
@@ -37,12 +42,13 @@ function openImagePicker() {
 }
 
 async function handleSave() {
-  if (isSubmitting.value) return
+  if (isSubmitting.value || isLoadingProfile.value) return
 
   // Reset previous validation errors
   submitError.value = ''
   fullNameError.value = ''
   phoneNumberError.value = ''
+  imageError.value = ''
 
   const trimmedFullName = fullName.value.trim()
   const trimmedPhoneNumber = phoneNumber.value.trim()
@@ -66,12 +72,30 @@ async function handleSave() {
 
   isSubmitting.value = true
 
+  let profileSaved = false
+
   try {
+    // 1. Save full name and phone number
     await authStore.saveProfile({
       fullName: trimmedFullName,
       phoneNumber: trimmedPhoneNumber || null,
     })
 
+    profileSaved = true
+
+    // 2. Upload profile picture if a new one was selected
+    if (selectedImageFile.value) {
+      await authStore.saveAvatar(selectedImageFile.value)
+
+      selectedImageFile.value = null
+
+      if (profileImage.value) {
+        URL.revokeObjectURL(profileImage.value)
+        profileImage.value = null
+      }
+    }
+
+    // 3. Show success only after both operations finish
     showSuccessModal.value = true
   } catch (error) {
     console.error('Failed to update profile:', error)
@@ -79,8 +103,13 @@ async function handleSave() {
     if (axios.isAxiosError(error)) {
       const data = error.response?.data
 
-      // Handle field-specific backend validation errors
-      if (error.response?.status === 400 && data?.errors) {
+      // Profile details saved, but image upload failed
+      if (profileSaved) {
+        imageError.value =
+          typeof data?.message === 'string'
+            ? `Profile details saved, but picture upload failed: ${data.message}`
+            : 'Profile details saved, but picture upload failed. Please try again.'
+      } else if (error.response?.status === 400 && data?.errors) {
         const fieldErrors = data.errors.fieldErrors ?? data.errors
 
         fullNameError.value = fieldErrors.fullName?.[0] ?? ''
@@ -96,7 +125,9 @@ async function handleSave() {
             : 'Failed to update profile. Please try again.'
       }
     } else {
-      submitError.value = 'An unexpected error occurred.'
+      submitError.value = profileSaved
+        ? 'Profile details saved, but picture upload failed. Please try again.'
+        : 'An unexpected error occurred.'
     }
   } finally {
     isSubmitting.value = false
@@ -111,7 +142,6 @@ function handleImageChange(event: Event) {
 
   imageError.value = ''
 
-  // Only allow supported image formats
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
 
   if (!allowedTypes.includes(file.type)) {
@@ -120,19 +150,20 @@ function handleImageChange(event: Event) {
     return
   }
 
-  // Maximum image size: 2 MB
-  if (file.size > 2 * 1024 * 1024) {
-    imageError.value = 'Image size must not exceed 2 MB.'
+  if (file.size === 0 || file.size > 2 * 1024 * 1024) {
+    imageError.value = 'Image size must be between 1 byte and 2 MB.'
     input.value = ''
     return
   }
 
-  // Generate a temporary preview
+  // Release the previous temporary preview URL
   if (profileImage.value) {
     URL.revokeObjectURL(profileImage.value)
   }
 
+  selectedImageFile.value = file
   profileImage.value = URL.createObjectURL(file)
+
   input.value = ''
 }
 
@@ -152,6 +183,12 @@ onMounted(async () => {
     submitError.value = 'Unable to load your profile. Please try again.'
   } finally {
     isLoadingProfile.value = false
+  }
+})
+
+onUnmounted(() => {
+  if (profileImage.value) {
+    URL.revokeObjectURL(profileImage.value)
   }
 })
 </script>
@@ -176,17 +213,19 @@ onMounted(async () => {
 
       <!-- Page Content -->
       <div class="flex min-h-0 flex-1 flex-col">
-        <div className="text-center pb-6">
+        <div class="text-center pb-6">
           <!-- Page Title -->
           <h1 class="shrink-0 text-xl font-bold text-stone-900">Edit Profile</h1>
 
-          <p
-            v-if="submitError"
-            role="alert"
-            class="mb-4 rounded-xl bg-red-50/90 px-4 py-3 text-center text-sm text-red-700"
-          >
-            {{ submitError }}
-          </p>
+          <div class="h-3 mt-1">
+            <p
+              v-if="submitError"
+              role="alert"
+              class="mb-4 rounded-xl bg-red-50/90 px-4 py-3 text-center text-sm text-red-700"
+            >
+              {{ submitError }}
+            </p>
+          </div>
 
           <p class="mt-1 text-xs text-stone-500">Keep your account details up to date</p>
         </div>
@@ -219,9 +258,9 @@ onMounted(async () => {
               >
                 <!-- Selected Image -->
                 <img
-                  v-if="profileImage"
-                  :src="profileImage"
-                  alt="Profile picture preview"
+                  v-if="displayedProfileImage"
+                  :src="displayedProfileImage"
+                  alt="Profile picture"
                   class="h-full w-full object-cover"
                 />
 

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { AuthUser } from '@/services/auth'
 import { getCurrentUser, refreshAccessToken, logout as logoutRequest } from '@/services/auth'
-import { updateProfile } from '@/services/users/userService'
+import { updateProfile, uploadAvatar } from '@/services/users/userService'
 import type { UpdateProfilePayload } from '@/services/users/userService'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -52,7 +52,10 @@ export const useAuthStore = defineStore('auth', () => {
     const updatedUser = await updateProfile(payload)
 
     // Synchronize the Pinia store with the updated user
-    user.value = updatedUser
+    user.value = {
+      ...user.value,
+      ...updatedUser,
+    }
 
     return updatedUser
   }
@@ -108,6 +111,18 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function saveAvatar(file: File) {
+    if (!accessToken.value) {
+      throw new Error('No access token available')
+    }
+
+    const updatedUser = await uploadAvatar(file)
+
+    user.value = updatedUser
+
+    return updatedUser
+  }
+
   return {
     user,
     accessToken,
@@ -120,5 +135,6 @@ export const useAuthStore = defineStore('auth', () => {
     saveProfile,
     restoreSession,
     logout,
+    saveAvatar,
   }
 })

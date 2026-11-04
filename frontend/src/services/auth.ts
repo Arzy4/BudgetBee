@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string
   phoneNumber: string | null
   createdAt?: string
+  profileImage: string | null
 }
 
 export interface LoginResponse {
