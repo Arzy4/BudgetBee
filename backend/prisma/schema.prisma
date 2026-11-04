@@ -45,6 +45,8 @@ model User {
   profileImage   String?
   profileImageId String?
 
+  passwordResets PasswordReset[]
+
   categories      Category[]
   transactions    Transaction[]
   budgets         Budget[]
@@ -137,4 +139,25 @@ model RefreshSession {
 
   @@index([userId])
   @@map("refresh_sessions")
+}
+
+model PasswordReset {
+  id        Int    @id @default(autoincrement())
+  requestId String @unique @default(uuid())
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  codeHash             String
+  codeExpiresAt        DateTime
+  verificationAttempts Int      @default(0)
+
+  verifiedAt          DateTime?
+  resetTokenHash      String?   @unique
+  resetTokenExpiresAt DateTime?
+
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("password_resets")
 }

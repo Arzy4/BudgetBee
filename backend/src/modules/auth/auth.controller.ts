@@ -1,17 +1,15 @@
 import type { Request, Response } from "express";
-import { Prisma } from "../../generated/prisma/client.js";;
+import { Prisma } from "../../generated/prisma/client.js";
 import { z } from "zod/mini";
 import type { AuthenticatedRequest } from "../../types/auth-request.js";
+import { requestPasswordReset, verifyPasswordResetCode, confirmPasswordReset } from "./password-reset.service.js";
 import {
   REFRESH_COOKIE_NAME,
   refreshCookieOptions,
   clearRefreshCookieOptions,
 } from "./auth.cookie.js";
 
-import {
-  registerSchema,
-  loginSchema,
-} from "./auth.schema.js";
+import { registerSchema, loginSchema } from "./auth.schema.js";
 
 import {
   registerUser,
@@ -19,6 +17,26 @@ import {
   refreshUserToken,
   logoutUser,
 } from "./auth.service.js";
+
+const passwordResetRequestSchema = z.object({
+  email: z.email(),
+});
+
+const passwordResetVerifySchema = z.object({
+  requestId: z.uuid(),
+  code: z.string().check(
+    z.regex(/^\d{6}$/, "Verification code must contain exactly 6 digits")
+  ),
+});
+
+const passwordResetConfirmSchema = z.object({
+  resetToken: z.string().check(
+    z.regex(/^[a-fA-F0-9]{64}$/, "Invalid reset token format"),
+  ),
+  newPassword: z.string().check(
+    z.minLength(8, "Password must contain at least 8 characters"),
+  ),
+});
 
 // Register Contoller
 export async function registerController(
@@ -237,6 +255,116 @@ export async function logoutController(
     res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+}
+
+// Request Password-Reset Controller
+export async function requestPasswordResetController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const validation = passwordResetRequestSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    res.status(400).json({
+      success: false,
+      message: "Please provide a valid email address.",
+    });
+    return;
+  }
+
+  try {
+    const requestId = await requestPasswordReset(validation.data.email);
+
+    res.status(200).json({
+      success: true,
+      message:
+        "If an account exists with this email, a verification code will be sent.",
+      requestId,
+    });
+  } catch (error) {
+    console.error("Password reset request failed:", error);
+
+    // Return a generic response to avoid exposing account existence.
+    res.status(200).json({
+      success: true,
+      message:
+        "If an account exists with this email, a verification code will be sent.",
+    });
+  }
+}
+
+// Verify Password-Reset Controller
+export async function verifyPasswordResetController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const validation = passwordResetVerifySchema.safeParse(
+    req.body,
+  );
+
+  if (!validation.success) {
+    res.status(400).json({
+      success: false,
+      message: "Invalid request ID or verification code format.",
+    });
+    return;
+  }
+
+  try {
+    const resetToken = await verifyPasswordResetCode(
+      validation.data.requestId,
+      validation.data.code,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Verification successful.",
+      resetToken,
+    });
+  } catch {
+    res.status(400).json({
+      success: false,
+      message: "Invalid or expired verification code.",
+    });
+  }
+}
+
+// Verify Password-Reset Controller
+export async function confirmPasswordResetController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const validation = passwordResetConfirmSchema.safeParse(
+    req.body,
+  );
+
+  if (!validation.success) {
+    res.status(400).json({
+      success: false,
+      message: "Invalid reset token or password format.",
+    });
+    return;
+  }
+
+  try {
+    await confirmPasswordReset(
+      validation.data.resetToken,
+      validation.data.newPassword,
+    );
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Password reset successfully. Please log in with your new password.",
+    });
+  } catch (error) {
+    console.error("Password reset confirmation failed:", error);
+
+    res.status(400).json({
+      success: false,
+      message: "Invalid or expired password reset token.",
     });
   }
 }
