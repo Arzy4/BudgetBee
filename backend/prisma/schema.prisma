@@ -42,6 +42,9 @@ model User {
   phoneNumber  String?
   passwordHash String
 
+  profileImage   String?
+  profileImageId String?
+
   categories      Category[]
   transactions    Transaction[]
   budgets         Budget[]

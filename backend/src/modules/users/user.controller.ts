@@ -6,6 +6,7 @@ import {
   getUserProfile,
   updateUserProfile,
   changeUserPassword,
+  updateUserAvatar
 } from "./user.service.js";
 import { updateProfileSchema, changePasswordSchema } from "./user.schema.js";
 import {
@@ -178,6 +179,65 @@ export async function changePasswordController(
     res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+}
+
+// Upload Profile Picture Controller
+export async function uploadAvatarController(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+    return;
+  }
+
+  if (!req.file) {
+    res.status(400).json({
+      success: false,
+      message: "Profile picture is required",
+    });
+    return;
+  }
+
+  try {
+    const updatedUser = await updateUserAvatar(userId, req.file);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile picture updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "USER_NOT_FOUND") {
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
+
+      if (error.message === "INVALID_IMAGE") {
+        res.status(400).json({
+          success: false,
+          message: "Invalid image file",
+        });
+        return;
+      }
+    }
+
+    console.error("Upload profile picture failed:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload profile picture",
     });
   }
 }

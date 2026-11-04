@@ -1,3 +1,6 @@
+import { fileTypeFromBuffer } from "file-type";
+import { Readable } from "node:stream";
+import cloudinary from "../../config/cloudinary.js";
 import { prisma } from "../../lib/prisma.js";
 import bcrypt from "bcrypt";
 import type { UpdateProfileInput, ChangePasswordInput } from "./user.schema.js";
@@ -14,6 +17,7 @@ export async function getUserProfile(userId: number) {
       email: true,
       phoneNumber: true,
       createdAt: true,
+      profileImage: true,
     },
   });
 }
@@ -102,4 +106,108 @@ export async function changeUserPassword(
       },
     }),
   ]);
+}
+
+// Update User Avatar
+export async function updateUserAvatar(
+  userId: number,
+  file: Express.Multer.File,
+) {
+  // 1. Verify the actual image format
+  const detectedType = await fileTypeFromBuffer(file.buffer);
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+  ];
+
+  if (!detectedType || !allowedTypes.includes(detectedType.mime)) {
+    throw new Error("INVALID_IMAGE");
+  }
+
+  // 2. Find the existing user
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      profileImageId: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  // 3. Upload the new picture to Cloudinary
+  const uploadedImage = await new Promise<{
+    secure_url: string;
+    public_id: string;
+  }>((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "budgetbee/avatars",
+        resource_type: "image",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        if (!result) {
+          reject(new Error("Cloudinary returned no upload result"));
+          return;
+        }
+
+        resolve({
+          secure_url: result.secure_url,
+          public_id: result.public_id,
+        });
+      },
+    );
+
+    Readable.from(file.buffer).pipe(uploadStream);
+  });
+
+  // 4. Update Prisma with the new image
+  let updatedUser;
+
+  try {
+    updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        profileImage: uploadedImage.secure_url,
+        profileImageId: uploadedImage.public_id,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phoneNumber: true,
+        profileImage: true,
+        createdAt: true,
+      },
+    });
+  } catch (error) {
+    // Remove the newly uploaded image if DB update fails
+    try {
+      await cloudinary.uploader.destroy(uploadedImage.public_id);
+    } catch (cleanupError) {
+      console.error("Failed to clean up new image:", cleanupError);
+    }
+
+    throw error;
+  }
+
+  // 5. Delete the previous picture
+  if (user.profileImageId) {
+    try {
+      await cloudinary.uploader.destroy(user.profileImageId);
+    } catch (error) {
+      console.error("Failed to delete previous avatar:", error);
+    }
+  }
+
+  return updatedUser;
 }
