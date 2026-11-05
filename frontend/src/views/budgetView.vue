@@ -26,7 +26,6 @@ import {
   deleteBudget,
 } from '@/services/budgets/budgetService.js'
 import type { MonthlyBudgets } from '@/types/budget'
-import BottomNavbar from '@/components/layout/bottomNavbar.vue'
 import { getCategories } from '@/services/categories/categoryService'
 import type { Category } from '@/services/categories/categoryService'
 
@@ -378,8 +377,7 @@ onMounted(fetchBudgets)
 
 <template>
   <main
-    class="relative min-h-screen w-full bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 py-8"
-    style="background-image: url('/images/dashboard-bg.png')"
+    class="relative min-h-screen w-full px-5 py-9"
   >
     <div class="mx-auto max-w-lg space-y-4">
       <!-- Header -->
@@ -533,7 +531,7 @@ onMounted(fetchBudgets)
           v-else-if="!budgetData || budgetData.budgets.length === 0"
           class="flex h-full flex-col items-center justify-center text-center"
         >
-          <p class="text-sm text-stone-500">No budgets created for this month yet.</p>
+          <p class="pb-10 text-center text-sm text-stone-500">No budgets created for this month yet.</p>
         </div>
 
         <!-- Scrollable Category List -->
@@ -934,6 +932,4 @@ onMounted(fetchBudgets)
       </div>
     </div>
   </div>
-
-  <BottomNavbar />
 </template>

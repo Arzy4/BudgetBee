@@ -15,7 +15,6 @@ import {
 } from 'lucide-vue-next'
 import { getTransactions } from '@/services/transactions/transactionService'
 import type { ApiTransaction } from '@/services/transactions/transactionService'
-import BottomNavbar from '@/components/layout/bottomNavbar.vue'
 
 type TransactionType = 'INCOME' | 'EXPENSE'
 type TransactionFilter = 'ALL' | TransactionType
@@ -386,8 +385,7 @@ const selectedPaymentMethodLabel = computed(
 
 <template>
   <main
-    class="relative flex h-dvh w-full flex-col overflow-hidden bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 pt-8 pb-20"
-    style="background-image: url('/images/dashboard-bg.png')"
+    class="relative min-h-screen w-full px-5 pt-9 pb-28 flex h-dvh w-full flex-col overflow-hidden"
   >
     <div class="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col gap-5">
       <!-- Header -->
@@ -499,7 +497,7 @@ const selectedPaymentMethodLabel = computed(
         <!-- Empty State -->
         <div
           v-else-if="filteredTransactions.length === 0"
-          class="rounded-2xl bg-white/40 p-8 text-center backdrop-blur-md"
+          class="flex justify-center items-center h-full pb-12"
         >
           <p class="text-sm text-stone-500">No transactions found.</p>
         </div>
@@ -967,6 +965,4 @@ const selectedPaymentMethodLabel = computed(
       </div>
     </div>
   </div>
-
-  <BottomNavbar />
 </template>

@@ -1,4 +1,5 @@
 import api from './api'
+import axios from 'axios'
 
 export interface AuthUser {
   id: number
@@ -16,6 +17,12 @@ export interface LoginResponse {
     accessToken: string
     user: AuthUser
   }
+}
+
+export type PasswordResetRequestResponse = {
+  success: boolean
+  message: string
+  requestId: string
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse['data']> {
@@ -62,4 +69,15 @@ export async function logout(): Promise<void> {
     {},
     { withCredentials: true },
   )
+}
+
+export async function requestPasswordReset(
+  email: string,
+): Promise<PasswordResetRequestResponse> {
+  const response = await api.post<PasswordResetRequestResponse>(
+    '/auth/password-reset/request',
+    { email },
+  )
+
+  return response.data
 }

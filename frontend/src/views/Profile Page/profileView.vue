@@ -15,7 +15,6 @@ import {
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
-import BottomNavbar from '@/components/layout/bottomNavbar.vue'
 import { getTransactions } from '@/services/transactions/transactionService'
 
 const router = useRouter()
@@ -105,8 +104,7 @@ function handleSettingClick(route: string | null) {
 
 <template>
   <main
-    class="relative flex h-dvh w-full flex-col overflow-hidden bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 pt-8"
-    style="background-image: url('/images/profile-bg.png')"
+    class="relative min-h-screen w-full px-5 pt-9 flex h-dvh w-full flex-col overflow-hidden"
   >
     <div class="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col">
       <!-- Fixed Header -->
@@ -260,13 +258,10 @@ function handleSettingClick(route: string | null) {
         </button>
 
         <!-- Footer -->
-        <footer class="mt-auto pt-10 text-center">
+        <footer class="mt-auto pt-8 text-center">
           <p class="text-xs text-[#A49B8E]">BudgetBee • Version 1.0</p>
         </footer>
       </div>
     </div>
   </main>
-
-  <!-- Bottom Navbar -->
-  <BottomNavbar />
 </template>

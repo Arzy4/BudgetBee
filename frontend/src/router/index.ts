@@ -2,40 +2,42 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/loginView.vue'
-import RegisterView from '../views/registerView.vue'
-import ProfileView from '../views/profileView.vue'
+import LoginView from '../views/Login Page/loginView.vue'
+import RegisterView from '../views/Login Page/registerView.vue'
+import ProfileView from '../views/Profile Page/profileView.vue'
 import dashboardView from '../views/dashboardView.vue'
 import addTransactionView from '../views/addTransactionView.vue'
 import budgetView from '../views/budgetView.vue'
-import historyView from '../views/historyView.vue'
-import transactionDetailView from '../views/transactionDetailView.vue'
-import editProfileView from '../views/editProfileView.vue'
+import historyView from '../views/History/historyView.vue'
+import transactionDetailView from '../views/History/transactionDetailView.vue'
+import editProfileView from '../views/Profile Page/editProfileView.vue'
+import ForgotPasswordView from '@/views/Login Page/forgotPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
-    {
       path: '/login',
       name: 'login',
       component: LoginView,
+      meta: {
+        background: 'auth',
+      },
     },
     {
       path: '/register',
       name: 'register',
       component: RegisterView,
+      meta: {
+        background: 'auth',
+      },
     },
     {
-      path: '/profile',
-      name: 'profile',
-      component: ProfileView,
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: ForgotPasswordView,
       meta: {
-        requiresAuth: true,
+        background: 'auth',
       },
     },
     {
@@ -44,38 +46,52 @@ const router = createRouter({
       component: dashboardView,
       meta: {
         requiresAuth: true,
-      },
-    },
-    {
-      path: '/transactions/add',
-      name: 'add-transaction',
-      component: addTransactionView,
-      meta: { 
-        requiresAuth: true 
+        background: 'dashboard',
       },
     },
     {
       path: '/budgets',
       name: 'budgets',
       component: budgetView,
-      meta: { 
-        requiresAuth: true 
+      meta: {
+        requiresAuth: true,
+        background: 'dashboard',
       },
     },
     {
       path: '/histories',
       name: 'histories',
       component: historyView,
-      meta: { 
-        requiresAuth: true 
+      meta: {
+        requiresAuth: true,
+        background: 'dashboard',
       },
     },
     {
       path: '/transactions/:id',
       name: 'transaction-detail',
       component: transactionDetailView,
-      meta: { 
-        requiresAuth: true 
+      meta: {
+        requiresAuth: true,
+        background: 'dashboard',
+      },
+    },
+    {
+      path: '/transactions/add',
+      name: 'add-transaction',
+      component: addTransactionView,
+      meta: {
+        requiresAuth: true,
+        background: 'dashboard',
+      },
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+      meta: {
+        requiresAuth: true,
+        background: 'dashboard',
       },
     },
     {
@@ -84,6 +100,7 @@ const router = createRouter({
       component: editProfileView,
       meta: {
         requiresAuth: true,
+        background: 'profile',
       },
     },
   ],

@@ -101,7 +101,12 @@ async function handleLogin() {
 
         <!-- Forgot Password -->
         <div class="flex justify-end pt-8">
-          <span class="text-xs font-semibold"> Forgot password? </span>
+          <RouterLink
+            to="/forgot-password"
+            class="text-xs font-semibold hover:underline"
+          >
+            Forgot password?
+          </RouterLink>
         </div>
 
         <!-- Login Button -->
@@ -122,7 +127,7 @@ async function handleLogin() {
 
         <RouterLink
           to="/register"
-          class="ml-1 font-semibold text-[#C9900B] underline underline-offset-4"
+          class="ml-1 font-semibold text-[#C9900B]"
         >
           Create one
         </RouterLink>

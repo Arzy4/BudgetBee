@@ -118,7 +118,7 @@ const getIconStyle = (category: string) => {
       <h2 class="text-lg font-bold text-stone-900">Recent Transactions</h2>
 
       <RouterLink
-        to="/transactions"
+        to="/histories"
         class="flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700"
       >
         See all
@@ -135,7 +135,7 @@ const getIconStyle = (category: string) => {
     </p>
 
     <!-- Empty State -->
-    <p v-else-if="recentTransactions.length === 0" class="py-8 text-center text-sm text-stone-500">
+    <p v-else-if="recentTransactions.length === 0" class="flex justify-center items-center h-full pb-17 text-center text-sm text-stone-500">
       No transactions yet.
     </p>
 
