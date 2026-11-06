@@ -1,9 +1,27 @@
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
+import { checkBudgetNotifications } from "../notifications/budget-notification.service.js";
 import type {
   CreateTransactionInput,
   UpdateTransactionInput,
 } from "./transaction.schema.js";
+
+const triggerBudgetNotification = async (
+  userId: number,
+  categoryId: number,
+  date: Date,
+) => {
+  try {
+    await checkBudgetNotifications(
+      userId,
+      categoryId,
+      date.getUTCMonth() + 1,
+      date.getUTCFullYear(),
+    );
+  } catch (error) {
+    console.error("Budget notification trigger failed:", error);
+  }
+};
 
 // Get All Transactions Logic
 export const getAllTransactions = async (userId: number) => {
@@ -110,6 +128,14 @@ export const createTransaction = async (
     },
   });
 
+  if (transaction.type === "EXPENSE") {
+    await triggerBudgetNotification(
+      transaction.userId,
+      transaction.categoryId,
+      transaction.date,
+    );
+  }
+
   return transaction;
 };
 
@@ -196,6 +222,14 @@ export const updateTransaction = async (
       },
     },
   });
+
+  if (updatedTransaction.type === "EXPENSE") {
+    await triggerBudgetNotification(
+      updatedTransaction.userId,
+      updatedTransaction.categoryId,
+      updatedTransaction.date,
+    );
+  }
 
   // Return the updated transaction
   return updatedTransaction;

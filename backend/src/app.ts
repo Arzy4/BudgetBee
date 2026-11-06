@@ -8,6 +8,7 @@ import transactionRoutes from "./modules/transactions/transaction.routes.js";
 import categoryRoutes from "./modules/categories/category.routes.js";
 import budgetRoutes from './modules/budgets/budget.routes.js'
 import userRoutes from './modules/users/user.routes.js'
+import notificationRoutes from "./modules/notifications/notification.routes.js";
 
 const app = express();
 
@@ -32,5 +33,6 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 export default app;
