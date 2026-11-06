@@ -2,16 +2,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/Login Page/loginView.vue'
-import RegisterView from '../views/Login Page/registerView.vue'
-import ProfileView from '../views/Profile Page/profileView.vue'
-import dashboardView from '../views/dashboardView.vue'
-import addTransactionView from '../views/addTransactionView.vue'
-import budgetView from '../views/budgetView.vue'
-import historyView from '../views/History/historyView.vue'
-import transactionDetailView from '../views/History/transactionDetailView.vue'
-import editProfileView from '../views/Profile Page/editProfileView.vue'
-import ForgotPasswordView from '@/views/Login Page/forgotPasswordView.vue'
+import LoginView from '../views/loginPage/LoginView.vue'
+import RegisterView from '../views/loginPage/RegisterView.vue'
+import ProfileView from '../views/profilePage/ProfileView.vue'
+import DashboardView from '../views/DashboardView.vue'
+import AddTransactionView from '../views/AddTransactionView.vue'
+import BudgetView from '../views/BudgetView.vue'
+import HistoryView from '../views/historyPage/HistoryView.vue'
+import TransactionDetailView from '../views/historyPage/TransactionDetailView.vue'
+import EditProfileView from '../views/profilePage/EditProfileView.vue'
+import ForgotPasswordView from '@/views/loginPage/ForgotPasswordView.vue'
+import ChangePasswordView from '@/views/profilePage/ChangePasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,7 +44,7 @@ const router = createRouter({
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: dashboardView,
+      component: DashboardView,
       meta: {
         requiresAuth: true,
         background: 'dashboard',
@@ -52,7 +53,7 @@ const router = createRouter({
     {
       path: '/budgets',
       name: 'budgets',
-      component: budgetView,
+      component: BudgetView,
       meta: {
         requiresAuth: true,
         background: 'dashboard',
@@ -61,7 +62,7 @@ const router = createRouter({
     {
       path: '/histories',
       name: 'histories',
-      component: historyView,
+      component: HistoryView,
       meta: {
         requiresAuth: true,
         background: 'dashboard',
@@ -70,7 +71,7 @@ const router = createRouter({
     {
       path: '/transactions/:id',
       name: 'transaction-detail',
-      component: transactionDetailView,
+      component: TransactionDetailView,
       meta: {
         requiresAuth: true,
         background: 'dashboard',
@@ -79,7 +80,7 @@ const router = createRouter({
     {
       path: '/transactions/add',
       name: 'add-transaction',
-      component: addTransactionView,
+      component: AddTransactionView,
       meta: {
         requiresAuth: true,
         background: 'dashboard',
@@ -97,7 +98,16 @@ const router = createRouter({
     {
       path: '/profile/edit',
       name: 'edit-profile',
-      component: editProfileView,
+      component: EditProfileView,
+      meta: {
+        requiresAuth: true,
+        background: 'profile',
+      },
+    },
+    {
+      path: '/profile/change-password',
+      name: 'change-password',
+      component: ChangePasswordView,
       meta: {
         requiresAuth: true,
         background: 'profile',

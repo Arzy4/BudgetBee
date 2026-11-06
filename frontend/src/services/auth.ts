@@ -19,6 +19,11 @@ export interface LoginResponse {
   }
 }
 
+export interface ChangePasswordResponse {
+  success: boolean
+  message: string
+}
+
 export type PasswordResetRequestResponse = {
   success: boolean
   message: string
@@ -77,6 +82,24 @@ export async function requestPasswordReset(
   const response = await api.post<PasswordResetRequestResponse>(
     '/auth/password-reset/request',
     { email },
+  )
+
+  return response.data
+}
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<ChangePasswordResponse> {
+  const response = await api.patch<ChangePasswordResponse>(
+    '/users/me/password',
+    {
+      currentPassword,
+      newPassword,
+    },
+    {
+      withCredentials: true,
+    },
   )
 
   return response.data

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import FinancialOverview from '@/components/dashboard/financialOverview.vue'
-import RecentTransactions from '@/components/dashboard/recentTransactions.vue'
+import FinancialOverview from '@/components/dashboard/FinancialOverview.vue'
+import RecentTransactions from '@/components/dashboard/RecentTransactions.vue'
 import { onMounted } from 'vue'
 import { useTransactionStore } from '@/stores/transactions'
 

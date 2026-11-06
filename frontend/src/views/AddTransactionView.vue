@@ -4,11 +4,11 @@ import { useRouter } from 'vue-router'
 import { ArrowLeft, CheckCircle2, X } from 'lucide-vue-next'
 import axios from 'axios'
 import { createTransaction } from '@/services/transactions/transactionService'
-import TransactionForm from '@/components/transactions/transactionForm.vue'
+import TransactionForm from '@/components/transactions/TransactionForm.vue'
 import type { CreateTransactionPayload } from '@/types/transaction'
 import { getCategories } from '@/services/categories/categoryService'
 import type { Category } from '@/services/categories/categoryService'
-import CategoryManager from '@/components/categories/categoryManager.vue'
+import CategoryManager from '@/components/categories/CategoryManager.vue'
 
 const router = useRouter()
 
@@ -94,7 +94,6 @@ function formatCurrency(amount: number) {
 <template>
   <main
     class="flex h-svh flex-col overflow-hidden bg-cover bg-center bg-no-repeat px-5 py-9 pb-10"
-    style="background-image: url('/images/dashboard-bg.png')"
   >
     <div class="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">
       <!-- Fixed header -->

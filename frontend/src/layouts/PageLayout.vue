@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import BottomNavbar from '@/components/layout/bottomNavbar.vue'
+import BottomNavbar from '@/components/layout/BottomNavbar.vue'
 
 const route = useRoute()
 
@@ -16,6 +16,8 @@ const backgroundImage = computed(() => {
       return '/images/dashboard-bg.png'
 
     case '/transactions/add':
+    case '/profile/edit':
+    case '/profile/change-password':
       return '/images/profile-bg.png'
 
     default:

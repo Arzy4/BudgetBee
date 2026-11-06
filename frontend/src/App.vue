@@ -3,7 +3,7 @@ import { RouterView, useRoute } from 'vue-router'
 import { computed, ref, watch } from 'vue'
 
 import AuthLayout from '@/layouts/AuthLayout.vue'
-import PageLayout from '@/layouts/pageLayout.vue'
+import PageLayout from '@/layouts/PageLayout.vue'
 
 const route = useRoute()
 const direction = ref('fade')
@@ -29,8 +29,9 @@ const navigationOrder = [
 watch(
   () => route.path,
   (to, from) => {
-    // Login → Register
-    if (from === '/login' && to === '/register' || from === '/login' && to === '/forgot-password') {
+    // Login → Register / Login → Forgot Password / Forgot Password → Password Form
+    if (
+      from === '/login' && to === '/register' || from === '/login' && to === '/forgot-password') {
       direction.value = 'slide-left'
       return
     }
