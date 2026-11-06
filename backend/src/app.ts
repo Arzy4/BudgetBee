@@ -17,6 +17,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://budget-bee-frontend-ten.vercel.app",
+      "https://localhost",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
