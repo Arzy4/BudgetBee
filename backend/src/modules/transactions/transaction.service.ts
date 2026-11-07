@@ -1,3 +1,6 @@
+import { fileTypeFromBuffer } from "file-type";
+import { Readable } from "node:stream";
+import cloudinary from "../../config/cloudinary.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { checkBudgetNotifications } from "../notifications/budget-notification.service.js";
@@ -23,7 +26,7 @@ const triggerBudgetNotification = async (
   }
 };
 
-// Get All Transactions Logic
+// Get All Transactions
 export const getAllTransactions = async (userId: number) => {
   // Retrieve transactions belonging to the authenticated user
   const transactions = await prisma.transaction.findMany({
@@ -48,7 +51,7 @@ export const getAllTransactions = async (userId: number) => {
   return transactions;
 };
 
-// Get Transaction By ID Logic
+// Get Transaction By ID
 export const getTransactionById = async (
   userId: number,
   transactionId: number,
@@ -83,7 +86,7 @@ export const getTransactionById = async (
   return transaction;
 };
 
-// Create Transaction Logic
+// Create Transaction
 export const createTransaction = async (
   userId: number,
   data: CreateTransactionInput,
@@ -139,7 +142,7 @@ export const createTransaction = async (
   return transaction;
 };
 
-// Update Transaction Logic
+// Update Transaction
 export const updateTransaction = async (
   userId: number,
   transactionId: number,
@@ -268,3 +271,126 @@ export const deleteTransaction = async (
   // Return the deleted transaction
   return deletedTransaction;
 };
+
+// Update Transaction Receipt
+export async function updateTransactionReceipt(
+  userId: number,
+  transactionId: number,
+  file: Express.Multer.File,
+) {
+  // Validate file size
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("IMAGE_TOO_LARGE");
+  }
+
+  // Verify the actual image format
+  const detectedType = await fileTypeFromBuffer(file.buffer);
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+  ];
+
+  if (!detectedType || !allowedTypes.includes(detectedType.mime)) {
+    throw new Error("INVALID_IMAGE");
+  }
+
+  // Find the existing transaction
+  const transaction = await prisma.transaction.findFirst({
+    where: {
+      id: transactionId,
+      userId,
+    },
+    select: {
+      id: true,
+      receiptKey: true,
+    },
+  });
+
+  if (!transaction) {
+    throw new Error("TRANSACTION_NOT_FOUND");
+  }
+
+  // Upload the new receipt to Cloudinary
+  const uploadedImage = await new Promise<{
+    secure_url: string;
+    public_id: string;
+  }>((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "budgetbee/receipts",
+        resource_type: "image",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        if (!result) {
+          reject(new Error("Cloudinary returned no upload result"));
+          return;
+        }
+
+        resolve({
+          secure_url: result.secure_url,
+          public_id: result.public_id,
+        });
+      },
+    );
+
+    Readable.from(file.buffer).pipe(uploadStream);
+  });
+
+  // Update the database
+  let updatedTransaction;
+
+  try {
+    updatedTransaction = await prisma.transaction.update({
+      where: {
+        id: transactionId,
+        userId,
+      },
+      data: {
+        receiptKey: uploadedImage.public_id,
+        receiptUrl: uploadedImage.secure_url,
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    // Delete the new image if database update fails
+    try {
+      await cloudinary.uploader.destroy(uploadedImage.public_id);
+    } catch (cleanupError) {
+      console.error(
+        "Failed to clean up new receipt:",
+        cleanupError,
+      );
+    }
+
+    throw error;
+  }
+
+  // Delete the previous receipt
+  if (transaction.receiptKey) {
+    try {
+      await cloudinary.uploader.destroy(transaction.receiptKey);
+    } catch (error) {
+      console.error(
+        "Failed to delete previous receipt:",
+        error,
+      );
+    }
+  }
+
+  return updatedTransaction;
+}

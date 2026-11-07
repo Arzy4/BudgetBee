@@ -9,6 +9,7 @@ import {
   getTransactionById,
   updateTransaction,
   deleteTransaction,
+  updateTransactionReceipt,
 } from "./transaction.service.js";
 
 // Get All Transactions Controller
@@ -358,3 +359,79 @@ export const deleteTransactionController = async (
   }
 };
 
+export const updateTransactionReceiptController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    // Get authenticated user ID
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    // Validate transaction ID
+    const transactionId = Number(req.params.id);
+
+    if (!Number.isSafeInteger(transactionId) || transactionId <= 0) {
+      res.status(400).json({
+        message: "Invalid transaction ID",
+      });
+      return;
+    }
+
+    // Check uploaded receipt
+    if (!req.file) {
+      res.status(400).json({
+        message: "Receipt image is required",
+      });
+      return;
+    }
+
+    // Update transaction receipt
+    const updatedTransaction = await updateTransactionReceipt(
+      userId,
+      transactionId,
+      req.file,
+    );
+
+    // Return updated transaction
+    res.status(200).json({
+      message: "Transaction receipt updated successfully",
+      data: updatedTransaction,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "TRANSACTION_NOT_FOUND") {
+        res.status(404).json({
+          message: "Transaction not found",
+        });
+        return;
+      }
+
+      if (error.message === "INVALID_IMAGE") {
+        res.status(400).json({
+          message: "Only JPG, PNG, and WebP images are allowed",
+        });
+        return;
+      }
+
+      if (error.message === "IMAGE_TOO_LARGE") {
+        res.status(400).json({
+          message: "Receipt image cannot exceed 5 MB",
+        });
+        return;
+      }
+    }
+
+    console.error("Transaction receipt upload failed:", error);
+
+    res.status(500).json({
+      message: "Unable to update transaction receipt",
+    });
+  }
+};

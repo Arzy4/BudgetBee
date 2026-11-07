@@ -94,6 +94,7 @@ model Transaction {
   paymentMethod PaymentMethod?
   date          DateTime        @default(now())
   receiptKey    String?
+  receiptUrl    String?
   title         String?
 
   userId Int

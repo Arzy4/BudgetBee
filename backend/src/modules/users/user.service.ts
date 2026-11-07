@@ -113,7 +113,7 @@ export async function updateUserAvatar(
   userId: number,
   file: Express.Multer.File,
 ) {
-  // 1. Verify the actual image format
+  // Verify the actual image format
   const detectedType = await fileTypeFromBuffer(file.buffer);
 
   const allowedTypes = [
@@ -126,7 +126,7 @@ export async function updateUserAvatar(
     throw new Error("INVALID_IMAGE");
   }
 
-  // 2. Find the existing user
+  // Find the existing user
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -139,7 +139,7 @@ export async function updateUserAvatar(
     throw new Error("USER_NOT_FOUND");
   }
 
-  // 3. Upload the new picture to Cloudinary
+  // Upload the new picture to Cloudinary
   const uploadedImage = await new Promise<{
     secure_url: string;
     public_id: string;
