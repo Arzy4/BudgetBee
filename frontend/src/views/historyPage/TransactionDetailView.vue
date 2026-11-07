@@ -15,11 +15,17 @@ import {
   ExternalLink,
   Pencil,
   Trash2,
-  X,
+  ChevronDown,
+  Check,
 } from 'lucide-vue-next'
 
-import { getTransactionById, updateTransaction } from '@/services/transactions/transactionService'
+import {
+  getTransactionById,
+  updateTransaction,
+  updateTransactionReceipt,
+} from '@/services/transactions/transactionService'
 import type { ApiTransaction } from '@/services/transactions/transactionService'
+import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
@@ -31,6 +37,17 @@ const errorMessage = ref('')
 const isEditing = ref(false)
 const isSaving = ref(false)
 const editErrorMessage = ref('')
+
+const isPaymentDropdownOpen = ref(false)
+const isCalendarOpen = ref(false)
+const calendarYear = ref(new Date().getFullYear())
+const calendarMonth = ref(new Date().getMonth())
+const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+
+const receiptFile = ref<File | null>(null)
+const receiptPreview = ref<string | null>(null)
+const receiptError = ref('')
+const MAX_RECEIPT_SIZE = 5 * 1024 * 1024
 
 interface EditTransactionForm {
   title: string
@@ -60,6 +77,9 @@ const paymentMethodOptions = [
   { label: 'E-WALLET', value: validPaymentMethods[2] },
   { label: 'CARD', value: validPaymentMethods[3] },
 ]
+
+const ALLOWED_RECEIPT_TYPES = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp']
+
 const transactionId = computed(() => Number(route.params.id))
 
 const fetchTransaction = async () => {
@@ -136,7 +156,25 @@ const goBack = () => {
 
 // Receipt image is not yet available from the current API.
 // receiptKey will later be resolved to an accessible image URL.
-const receiptImageUrl = ref<string | null>(null)
+const receiptImageUrl = computed(() => transaction.value?.receiptUrl ?? null)
+
+const hasTransactionChanges = computed(() => {
+  if (!transaction.value) return false
+
+  const original = transaction.value
+  const edited = editForm.value
+
+  return (
+    edited.title.trim() !== (original.title ?? '').trim() ||
+    Number(edited.amount) !== Number(original.amount) ||
+    edited.type !== original.type ||
+    edited.categoryId !== original.categoryId ||
+    edited.paymentMethod !== original.paymentMethod ||
+    edited.description.trim() !== (original.description ?? '').trim() ||
+    edited.date !== formatDateForInput(original.date) ||
+    receiptFile.value !== null
+  )
+})
 
 // Edit and delete actions will be connected in the next step.
 const handleEdit = () => {
@@ -154,13 +192,25 @@ const handleEdit = () => {
     date: formatDateForInput(current.date),
   }
 
+  const selectedDate = new Date(`${editForm.value.date}T12:00:00`)
+
+  calendarYear.value = selectedDate.getFullYear()
+  calendarMonth.value = selectedDate.getMonth()
+
+  isCalendarOpen.value = false
+  isPaymentDropdownOpen.value = false
+
   editErrorMessage.value = ''
   isEditing.value = true
+  isPaymentDropdownOpen.value = false
 }
 
 const cancelEdit = () => {
   isEditing.value = false
   editErrorMessage.value = ''
+  isPaymentDropdownOpen.value = false
+  isCalendarOpen.value = false
+  removeSelectedReceipt()
 }
 
 const saveTransaction = async () => {
@@ -211,6 +261,7 @@ const saveTransaction = async () => {
   isSaving.value = true
 
   try {
+    // Update transaction information
     const updatedTransaction = await updateTransaction(transaction.value.id, {
       title: form.title.trim(),
       amount,
@@ -222,12 +273,35 @@ const saveTransaction = async () => {
     })
 
     transaction.value = updatedTransaction
-    isEditing.value = false
-  } catch (error) {
-    console.error('Failed to update transaction:', error)
 
-    editErrorMessage.value = 'Unable to update transaction. Please try again.'
+    // Upload receipt if a new image was selected
+    if (receiptFile.value) {
+      const updatedWithReceipt = await updateTransactionReceipt(
+        updatedTransaction.id,
+        receiptFile.value,
+      )
+
+      transaction.value = updatedWithReceipt
+    }
+
+    // Clear temporary image preview
+    removeSelectedReceipt()
+
+    // Exit Edit Mode
+    isEditing.value = false
+    isPaymentDropdownOpen.value = false
+    isCalendarOpen.value = false
+  } catch (error) {
+    console.error('Failed to save transaction:', error)
+
+    if (axios.isAxiosError(error)) {
+      console.error('Backend error response:', error.response?.data)
+      console.error('HTTP status:', error.response?.status)
+    }
+
+    editErrorMessage.value = 'Unable to save all transaction changes. Please try again.'
   } finally {
+    // Always reset loading state
     isSaving.value = false
   }
 }
@@ -235,11 +309,117 @@ const saveTransaction = async () => {
 const handleDelete = () => {
   console.log('Delete transaction:', transaction.value?.id)
 }
+
+const selectedPayment = computed(() =>
+  paymentMethodOptions.find((option) => option.value === editForm.value.paymentMethod),
+)
+
+function selectPaymentMethod(value: string) {
+  editForm.value.paymentMethod = value
+  isPaymentDropdownOpen.value = false
+}
+
+function togglePaymentDropdown() {
+  isPaymentDropdownOpen.value = !isPaymentDropdownOpen.value
+  isCalendarOpen.value = false
+}
+
+const calendarTitle = computed(() =>
+  new Date(calendarYear.value, calendarMonth.value, 1).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  }),
+)
+
+const calendarDays = computed(() => {
+  const firstDay = new Date(calendarYear.value, calendarMonth.value, 1).getDay()
+
+  const daysInMonth = new Date(calendarYear.value, calendarMonth.value + 1, 0).getDate()
+
+  return [
+    ...Array(firstDay).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ] as (number | null)[]
+})
+
+const formattedEditDate = computed(() => {
+  if (!editForm.value.date) return 'Select date'
+
+  const date = new Date(`${editForm.value.date}T12:00:00`)
+
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+})
+
+function changeCalendarMonth(offset: number) {
+  const date = new Date(calendarYear.value, calendarMonth.value + offset, 1)
+
+  calendarYear.value = date.getFullYear()
+  calendarMonth.value = date.getMonth()
+}
+
+function selectCalendarDay(day: number) {
+  editForm.value.date = [
+    calendarYear.value,
+    String(calendarMonth.value + 1).padStart(2, '0'),
+    String(day).padStart(2, '0'),
+  ].join('-')
+
+  isCalendarOpen.value = false
+}
+
+function toggleCalendar() {
+  isCalendarOpen.value = !isCalendarOpen.value
+  isPaymentDropdownOpen.value = false
+}
+
+function handleReceiptUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  receiptError.value = ''
+
+  if (!file) return
+
+  if (!ALLOWED_RECEIPT_TYPES.includes(file.type)) {
+    receiptError.value = 'Only JPG, PNG, and WebP images are allowed'
+    input.value = ''
+    return
+  }
+
+  if (file.size > MAX_RECEIPT_SIZE) {
+    receiptError.value = 'Receipt image cannot exceed 5 MB'
+    input.value = ''
+    return
+  }
+
+  if (receiptPreview.value) {
+    URL.revokeObjectURL(receiptPreview.value)
+  }
+
+  receiptFile.value = file
+  receiptPreview.value = URL.createObjectURL(file)
+
+  input.value = ''
+}
+
+function removeSelectedReceipt() {
+  if (receiptPreview.value) {
+    URL.revokeObjectURL(receiptPreview.value)
+  }
+
+  receiptFile.value = null
+  receiptPreview.value = null
+  receiptError.value = ''
+}
 </script>
 
 <template>
   <main
-    class="flex h-dvh w-full flex-col overflow-hidden bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 pt-9 pb-4"
+    class="flex h-dvh w-full flex-col overflow-hidden bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 pt-9 pb-10"
     style="background-image: url('/images/dashboard-bg.png')"
   >
     <div class="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col">
@@ -367,7 +547,7 @@ const handleDelete = () => {
 
               <!-- Transaction Information -->
               <section
-                class="rounded-3xl border border-white/80 bg-white/40 p-5 shadow-sm backdrop-blur-md"
+                class="relative z-20 rounded-3xl border border-white/80 bg-white/40 p-5 shadow-sm backdrop-blur-md"
               >
                 <h2 class="mb-5 text-base font-bold text-stone-900">Transaction Information</h2>
 
@@ -423,50 +603,175 @@ const handleDelete = () => {
                   </p>
                 </div>
 
-                <!-- Payment Method -->
-                <div class="mb-4">
+                <!-- Custom Payment Method Dropdown -->
+                <div class="relative z-30 mb-4">
                   <label
-                    for="edit-payment-method"
+                    id="edit-payment-method-label"
                     class="mb-2 block text-sm font-medium text-stone-600"
                   >
                     Payment Method
                   </label>
 
-                  <select
-                    id="edit-payment-method"
-                    v-model="editForm.paymentMethod"
-                    required
-                    class="w-full rounded-2xl border border-stone-200 bg-white/80 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-amber-400"
-                  >
-                    <option
-                      v-for="method in paymentMethodOptions"
-                      :key="method.value"
-                      :value="method.value"
+                  <div class="relative">
+                    <!-- Dropdown Trigger -->
+                    <button
+                      type="button"
+                      aria-labelledby="edit-payment-method-label"
+                      aria-haspopup="listbox"
+                      :aria-expanded="isPaymentDropdownOpen"
+                      class="flex w-full items-center justify-between rounded-2xl border bg-[#FFF8ED] px-3 py-3.5 text-left text-sm font-medium text-stone-800 transition-colors"
+                      :class="
+                        isPaymentDropdownOpen
+                          ? 'border-amber-500 ring-1 ring-amber-400'
+                          : 'border-stone-200'
+                      "
+                      @click="togglePaymentDropdown"
                     >
-                      {{ method.label }}
-                    </option>
-                  </select>
+                      <span>
+                        {{ selectedPayment?.label ?? 'Select payment method' }}
+                      </span>
+
+                      <ChevronDown
+                        :size="18"
+                        class="text-stone-500 transition-transform duration-200"
+                        :class="{ 'rotate-180': isPaymentDropdownOpen }"
+                      />
+                    </button>
+
+                    <!-- Dropdown Options -->
+                    <div
+                      v-if="isPaymentDropdownOpen"
+                      role="listbox"
+                      aria-labelledby="edit-payment-method-label"
+                      class="absolute inset-x-0 top-full z-50 mt-2 rounded-xl border border-amber-200 bg-[#FFF8ED] p-2 shadow-xl"
+                    >
+                      <button
+                        v-for="method in paymentMethodOptions"
+                        :key="method.value"
+                        type="button"
+                        role="option"
+                        :aria-selected="editForm.paymentMethod === method.value"
+                        class="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm text-stone-700 transition-colors hover:bg-amber-50"
+                        :class="
+                          editForm.paymentMethod === method.value ? 'bg-amber-100 font-medium' : ''
+                        "
+                        @click="selectPaymentMethod(method.value)"
+                      >
+                        <span>{{ method.label }}</span>
+
+                        <Check
+                          v-if="editForm.paymentMethod === method.value"
+                          :size="17"
+                          class="text-amber-600"
+                        />
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Transaction Date -->
-                <div>
-                  <label for="edit-date" class="mb-2 block text-sm font-medium text-stone-600">
-                    Transaction Date
-                  </label>
+                <!-- Custom Transaction Date Calendar -->
+                <div class="relative z-10">
+                  <div>
+                    <label
+                      id="edit-date-label"
+                      class="mb-2 block text-sm font-medium text-stone-600"
+                    >
+                      Transaction Date
+                    </label>
 
-                  <input
-                    id="edit-date"
-                    v-model="editForm.date"
-                    type="date"
-                    required
-                    class="w-full rounded-2xl border border-stone-200 bg-white/80 px-4 py-3 text-sm font-semibold text-stone-800 outline-none focus:border-amber-400"
-                  />
+                    <!-- Calendar Trigger -->
+                    <button
+                      type="button"
+                      aria-labelledby="edit-date-label"
+                      :aria-expanded="isCalendarOpen"
+                      class="flex w-full items-center justify-between rounded-2xl border bg-[#FFF8ED] px-3 py-3.5 text-left text-sm font-medium text-stone-800 transition-colors"
+                      :class="
+                        isCalendarOpen
+                          ? 'border-amber-500 ring-1 ring-amber-400'
+                          : 'border-stone-200'
+                      "
+                      @click="toggleCalendar"
+                    >
+                      <span>{{ formattedEditDate }}</span>
+
+                      <ChevronDown
+                        :size="18"
+                        class="text-stone-500 transition-transform duration-200"
+                        :class="{ 'rotate-180': isCalendarOpen }"
+                      />
+                    </button>
+
+                    <!-- Calendar Popup -->
+                    <div
+                      v-if="isCalendarOpen"
+                      class="absolute inset-x-0 top-full z-50 mt-2 rounded-2xl border border-amber-200 bg-[#FFF8ED] p-3 shadow-xl"
+                    >
+                      <!-- Month Navigation -->
+                      <div class="mb-3 flex items-center justify-between">
+                        <button
+                          type="button"
+                          aria-label="Previous month"
+                          class="rounded-lg p-2 hover:bg-amber-100"
+                          @click="changeCalendarMonth(-1)"
+                        >
+                          <ChevronDown :size="18" class="rotate-90" />
+                        </button>
+
+                        <span class="text-sm font-semibold text-stone-800">
+                          {{ calendarTitle }}
+                        </span>
+
+                        <button
+                          type="button"
+                          aria-label="Next month"
+                          class="rounded-lg p-2 hover:bg-amber-100"
+                          @click="changeCalendarMonth(1)"
+                        >
+                          <ChevronDown :size="18" class="-rotate-90" />
+                        </button>
+                      </div>
+
+                      <!-- Calendar Grid -->
+                      <div class="grid grid-cols-7 gap-1 text-center">
+                        <span
+                          v-for="day in weekdays"
+                          :key="day"
+                          class="py-1 text-xs font-semibold text-stone-500"
+                        >
+                          {{ day }}
+                        </span>
+
+                        <template v-for="(day, index) in calendarDays" :key="index">
+                          <span v-if="day === null"></span>
+
+                          <button
+                            v-else
+                            type="button"
+                            class="aspect-square rounded-full text-xs transition hover:bg-amber-100"
+                            :class="
+                              editForm.date ===
+                              [
+                                calendarYear,
+                                String(calendarMonth + 1).padStart(2, '0'),
+                                String(day).padStart(2, '0'),
+                              ].join('-')
+                                ? 'bg-amber-400 font-bold text-stone-900'
+                                : 'text-stone-700'
+                            "
+                            @click="selectCalendarDay(day)"
+                          >
+                            {{ day }}
+                          </button>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
               <!-- Description -->
               <section
-                class="rounded-3xl border border-white/80 bg-white/40 p-5 shadow-sm backdrop-blur-md"
+                class="relative z-0 rounded-3xl border border-white/80 bg-white/40 p-5 shadow-sm backdrop-blur-md"
               >
                 <h2 class="mb-4 text-base font-bold text-stone-900">Description</h2>
 
@@ -486,19 +791,80 @@ const handleDelete = () => {
               >
                 <h2 class="mb-4 text-base font-bold text-stone-900">Transaction Screenshot</h2>
 
+                <!-- Selected image preview -->
                 <div
+                  v-if="receiptPreview"
+                  class="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-3"
+                >
+                  <img
+                    :src="receiptPreview"
+                    alt="Selected transaction receipt"
+                    class="max-h-64 w-full rounded-xl object-contain"
+                  />
+
+                  <button
+                    type="button"
+                    class="mt-3 w-full rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                    @click="removeSelectedReceipt"
+                  >
+                    Remove Selected Image
+                  </button>
+                </div>
+
+                <!-- Existing Cloudinary receipt -->
+                <div
+                  v-else-if="transaction?.receiptUrl"
+                  class="overflow-hidden rounded-2xl border border-stone-200 bg-white p-3"
+                >
+                  <img
+                    :src="transaction.receiptUrl"
+                    alt="Current transaction receipt"
+                    class="max-h-64 w-full rounded-xl object-contain"
+                  />
+
+                  <p class="mt-3 text-center text-xs text-stone-500">Current transaction receipt</p>
+                </div>
+
+                <!-- Empty state -->
+                <div
+                  v-else
                   class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white px-4 py-7 text-center"
                 >
                   <FileImage :size="28" class="text-stone-400" />
 
                   <p class="mt-3 text-sm font-medium text-stone-600">
-                    Receipt editing is not available yet
+                    No transaction screenshot selected
                   </p>
 
                   <p class="mt-1 text-xs text-stone-400">
-                    Existing transaction receipts will remain unchanged.
+                    Upload a JPG, PNG, or WebP image (max 5 MB).
                   </p>
                 </div>
+
+                <!-- Upload button -->
+                <label
+                  for="edit-receipt-upload"
+                  class="mt-4 flex cursor-pointer items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 transition hover:bg-amber-100"
+                >
+                  {{
+                    transaction?.receiptUrl || receiptPreview
+                      ? 'Replace Screenshot'
+                      : 'Upload Screenshot'
+                  }}
+                </label>
+
+                <input
+                  id="edit-receipt-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="sr-only"
+                  @change="handleReceiptUpload"
+                />
+
+                <!-- Validation error -->
+                <p v-if="receiptError" class="mt-2 text-xs font-medium text-red-600">
+                  {{ receiptError }}
+                </p>
               </section>
 
               <!-- Error Message -->
@@ -523,8 +889,8 @@ const handleDelete = () => {
 
                 <button
                   type="submit"
-                  :disabled="isSaving"
-                  class="rounded-2xl bg-[#FFBA08] px-4 py-4 text-sm font-bold text-stone-900 transition-colors hover:bg-amber-400 disabled:opacity-50"
+                  :disabled="isSaving || !hasTransactionChanges"
+                  class="rounded-2xl bg-[#FFBA08] px-4 py-4 text-sm font-bold text-stone-900 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed bg-[#FFBA08]/80 disabled:text-stone-900/80 disabled:opacity-70 disabled:hover:bg-amber-400/80"
                 >
                   {{ isSaving ? 'Saving...' : 'Save Changes' }}
                 </button>
@@ -637,32 +1003,34 @@ const handleDelete = () => {
             <section
               class="rounded-3xl border border-white/80 bg-white/40 p-5 shadow-sm backdrop-blur-md"
             >
-              <h2 class="mb-4 text-base font-bold text-stone-900">Transaction Screenshot</h2>
+              <div v-if="receiptImageUrl" class="rounded-2xl border border-white/80 bg-white p-4">
+                <!-- Receipt header -->
+                <div class="mb-4 flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-semibold text-stone-900">Transaction Receipt</p>
+                    <p class="mt-1 text-xs text-stone-500">Attached image</p>
+                  </div>
 
-              <div
-                v-if="receiptImageUrl"
-                class="flex items-center gap-3 rounded-2xl bg-white p-3 backdrop-blur-none"
-              >
-                <img
-                  :src="receiptImageUrl"
-                  alt="Transaction receipt screenshot"
-                  class="h-20 w-24 shrink-0 rounded-xl object-cover"
-                />
-
-                <div class="min-w-0 flex-1">
-                  <p class="truncate text-sm font-semibold text-stone-800">Transaction receipt</p>
-                  <p class="mt-1 text-xs text-stone-500">Attached image</p>
+                  <!-- External link -->
+                  <a
+                    :href="receiptImageUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-700 transition hover:bg-amber-200"
+                    aria-label="Open receipt in new tab"
+                  >
+                    <ExternalLink :size="20" />
+                  </a>
                 </div>
 
-                <a
-                  :href="receiptImageUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="View transaction screenshot"
-                  class="rounded-xl bg-amber-100 p-3 text-amber-700"
-                >
-                  <ExternalLink :size="19" />
-                </a>
+                <!-- Full receipt screenshot -->
+                <div class="flex justify-center">
+                  <img
+                    :src="receiptImageUrl"
+                    alt="Transaction receipt"
+                    class="h-auto max-w-full rounded-xl object-contain"
+                  />
+                </div>
               </div>
 
               <div

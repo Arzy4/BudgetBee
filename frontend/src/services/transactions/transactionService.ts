@@ -11,6 +11,7 @@ export interface ApiTransaction {
   paymentMethod: string
   date: string
   receiptKey: string | null
+  receiptUrl: string | null;
   categoryId: number
   createdAt: string
   updatedAt: string
@@ -74,7 +75,6 @@ export async function getTransactionById(
   return response.data.data
 }
 
-
 /* Update Transaction By ID */
 export async function updateTransaction(
   id: number,
@@ -88,12 +88,34 @@ export async function updateTransaction(
   return response.data.data
 }
 
-// Delete Transaction By ID
+/* Delete Transaction */
 export async function deleteTransaction(
   id: number,
 ): Promise<ApiTransaction> {
   const response = await api.delete<TransactionResponse>(
     `/transactions/${id}`,
+  )
+
+  return response.data.data
+}
+
+/* Update Transaction Receipt */
+export async function updateTransactionReceipt(
+  id: number,
+  file: File,
+): Promise<ApiTransaction> {
+  const formData = new FormData()
+
+  formData.append('receipt', file, file.name)
+
+  const response = await api.patch<TransactionResponse>(
+    `/transactions/${id}/receipt`,
+    formData,
+    {
+      headers: {
+        'Content-Type': undefined,
+      },
+    },
   )
 
   return response.data.data

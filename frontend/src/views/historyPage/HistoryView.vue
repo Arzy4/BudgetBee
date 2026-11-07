@@ -385,7 +385,7 @@ const selectedPaymentMethodLabel = computed(
 
 <template>
   <main
-    class="relative min-h-screen w-full px-5 pt-9 pb-28 flex h-dvh w-full flex-col overflow-hidden"
+    class="relative w-full px-5 pt-9 pb-28 flex h-dvh flex-col overflow-hidden"
   >
     <div class="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col gap-5">
       <!-- Header -->

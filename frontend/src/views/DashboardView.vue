@@ -13,7 +13,7 @@ onMounted(() => {
 
 <template>
   <main
-    class="relative min-h-screen w-full px-5 py-9"
+    class="relative min-h-screen w-full px-5 pt-9 pb-28"
   >
     <!-- Dashboard Content -->
     <div class="relative z-10 mx-auto max-w-3xl space-y-5">

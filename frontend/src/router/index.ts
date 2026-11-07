@@ -18,6 +18,10 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      redirect: '/login',
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginView,
@@ -137,7 +141,7 @@ router.beforeEach(async (to) => {
 
   // Redirect authenticated users away from Login and Register
   if (authStore.isAuthenticated && (to.name === 'login' || to.name === 'register')) {
-    return { name: 'profile' }
+    return { name: 'dashboard' }
   }
 
   return true

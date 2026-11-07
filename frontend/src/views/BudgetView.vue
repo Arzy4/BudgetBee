@@ -492,7 +492,7 @@ onMounted(fetchBudgets)
 
       <!-- Category Budgets Content -->
       <section
-        class="mt-4 flex h-[38svh] w-full flex-col rounded-3xl border border-white/40 bg-white/40 p-4 shadow-lg shadow-amber-900/5 backdrop-blur-md"
+        class="mt-4 flex h-[35.5svh] w-full flex-col rounded-3xl border border-white/40 bg-white/40 p-4 shadow-lg shadow-amber-900/5 backdrop-blur-md"
       >
         <!-- Category Budgets Header -->
         <div class="flex shrink-0 items-center justify-between gap-3 pb-4">

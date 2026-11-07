@@ -1,5 +1,5 @@
 import api from './api'
-import axios from 'axios'
+import { getFreshAccessToken } from './refreshManager'
 
 export interface AuthUser {
   id: number
@@ -59,13 +59,11 @@ export interface RefreshTokenResponse {
 }
 
 export async function refreshAccessToken(): Promise<RefreshTokenResponse['data']> {
-  const response = await api.post<RefreshTokenResponse>(
-    '/auth/refresh',
-    {},
-    { withCredentials: true },
-  )
+  const accessToken = await getFreshAccessToken()
 
-  return response.data.data
+  return {
+    accessToken,
+  }
 }
 
 export async function logout(): Promise<void> {

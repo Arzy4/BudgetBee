@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 import BottomNavbar from '@/components/layout/BottomNavbar.vue'
@@ -27,12 +27,7 @@ const backgroundImage = computed(() => {
 
 // Show navbar only on main pages
 const showNavbar = computed(() =>
-  [
-    '/dashboard',
-    '/budgets',
-    '/histories',
-    '/profile',
-  ].includes(route.path)
+  ['/dashboard', '/budgets', '/histories', '/profile'].includes(route.path),
 )
 </script>
 
@@ -40,11 +35,9 @@ const showNavbar = computed(() =>
   <div class="relative min-h-svh overflow-x-hidden bg-[#FBF3E6]">
     <!-- Shared background -->
     <div
-      class="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat"
+      class="pointer-events-none fixed inset-0 bg-cover bg-center bg-no-repeat"
       :style="{
-        backgroundImage: backgroundImage
-          ? `url('${backgroundImage}')`
-          : 'none',
+        backgroundImage: backgroundImage ? `url('${backgroundImage}')` : 'none',
       }"
     ></div>
 
