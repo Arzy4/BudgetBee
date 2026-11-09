@@ -9,6 +9,7 @@ import categoryRoutes from "./modules/categories/category.routes.js";
 import budgetRoutes from './modules/budgets/budget.routes.js'
 import userRoutes from './modules/users/user.routes.js'
 import notificationRoutes from "./modules/notifications/notification.routes.js";
+import deviceRoutes from "./modules/notifications/device-token.routes.js";
 
 const app = express();
 
@@ -35,5 +36,6 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/devices", deviceRoutes);
 
 export default app;
