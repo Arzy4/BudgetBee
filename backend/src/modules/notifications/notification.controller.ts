@@ -7,6 +7,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
+  acknowledgeForegroundNotification,
 } from "./notification.service.js";
 
 // GET /api/notifications
@@ -185,6 +186,55 @@ export const removeNotification = async (
 
     res.status(500).json({
       message: "Failed to delete notification",
+    });
+  }
+};
+
+export const acknowledgeForeground = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        message: "Unauthorized: User not authenticated",
+      });
+      return;
+    }
+
+    const userId = req.user.id;
+    const notificationId = Number(req.params.id);
+
+    if (
+      !Number.isSafeInteger(notificationId) ||
+      notificationId <= 0
+    ) {
+      res.status(400).json({
+        message: "Invalid notification ID",
+      });
+      return;
+    }
+
+    const deletedCount = await acknowledgeForegroundNotification(
+      userId,
+      notificationId,
+    );
+
+    if (deletedCount === 0) {
+      res.status(404).json({
+        message: "Foreground budget notification not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      message: "Foreground notification acknowledged successfully",
+    });
+  } catch (error) {
+    console.error("Acknowledge foreground notification error:", error);
+
+    res.status(500).json({
+      message: "Failed to acknowledge foreground notification",
     });
   }
 };

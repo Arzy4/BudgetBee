@@ -7,6 +7,7 @@ import {
   markAsRead,
   markAllAsRead,
   removeNotification,
+  acknowledgeForeground,
 } from "./notification.controller.js";
 
 import {
@@ -27,6 +28,11 @@ router.get("/", getNotifications);
 router.get("/unread-count", getUnreadCount);
 router.patch("/read-all", markAllAsRead);
 router.patch("/:id/read", markAsRead);
+
+// Foreground notification acknowledgment
+router.delete("/:id/foreground", acknowledgeForeground);
+
+// Delete notification from Notification Center
 router.delete("/:id", removeNotification);
 
 export default router;

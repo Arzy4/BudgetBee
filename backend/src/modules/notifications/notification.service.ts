@@ -155,3 +155,23 @@ export const deliverNotificationPush = async (
     };
   }
 };
+
+export const acknowledgeForegroundNotification = async (
+  userId: number,
+  notificationId: number
+) => {
+  const result = await prisma.notification.deleteMany({
+    where: {
+      id: notificationId,
+      userId,
+      type: {
+        in: [
+          "BUDGET_WARNING",
+          "BUDGET_EXCEEDED",
+        ],
+      },
+    },
+  });
+
+  return result.count;
+};
