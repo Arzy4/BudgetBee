@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ArrowLeft,
-  Bell,
   BellRing,
   Wallet,
   CalendarClock,
@@ -12,16 +11,13 @@ import {
   Check,
 } from 'lucide-vue-next'
 
-const router = useRouter()
+import {
+  getNotificationPreferences,
+  updateNotificationPreferences,
+  type NotificationPreferences,
+} from '@/services/notifications/notificationPreferences.service'
 
-type NotificationPreferences = {
-  pushNotifications: boolean
-  budgetAlerts: boolean
-  budgetWarning: boolean
-  budgetExceeded: boolean
-  monthlyReminders: boolean
-  securityAlerts: boolean
-}
+const router = useRouter()
 
 const preferences = ref<NotificationPreferences>({
   pushNotifications: true,
@@ -31,6 +27,29 @@ const preferences = ref<NotificationPreferences>({
   monthlyReminders: true,
   securityAlerts: true,
 })
+
+const isLoading = ref(true)
+const isSaving = ref(false)
+const errorMessage = ref('')
+
+async function loadPreferences() {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const data = await getNotificationPreferences()
+
+    preferences.value = { ...data }
+    savedPreferences.value = { ...data }
+  } catch (error) {
+    console.error('Failed to load notification preferences:', error)
+    errorMessage.value = 'Failed to load notification preferences.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(loadPreferences)
 
 const savedPreferences = ref<NotificationPreferences>({
   ...preferences.value,
@@ -51,13 +70,28 @@ function togglePreference(key: keyof NotificationPreferences) {
   showSaveMessage.value = false
 }
 
-function savePreferences() {
-  // UI-only implementation.
-  // Connect this to the notification preferences API later.
-  showSaveMessage.value = false
+async function savePreferences() {
+  if (isSaving.value || isLoading.value || !hasChanges.value) return
 
-  // Do not mark as saved until the backend is connected.
-  console.info('Notification preferences ready for API integration:', preferences.value)
+  isSaving.value = true
+  showSaveMessage.value = false
+  errorMessage.value = ''
+
+  try {
+    const updated = await updateNotificationPreferences({
+      ...preferences.value,
+    })
+
+    preferences.value = { ...updated }
+    savedPreferences.value = { ...updated }
+
+    showSaveMessage.value = true
+  } catch (error) {
+    console.error('Failed to save notification preferences:', error)
+    errorMessage.value = 'Failed to save preferences. Please try again.'
+  } finally {
+    isSaving.value = false
+  }
 }
 
 function goBack() {
@@ -301,16 +335,24 @@ function goBack() {
           <!-- Save Button -->
           <button
             type="button"
-            :disabled="!hasChanges"
+            :disabled="!hasChanges || isLoading || isSaving"
             class="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-400 px-4 py-3.5 text-[13px] font-bold text-stone-900 transition hover:bg-amber-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             @click="savePreferences"
           >
             <Check :size="18" />
-            Save Preferences
+            {{ isSaving ? 'Saving...' : 'Save Preferences' }}
           </button>
 
-          <p class="text-center text-[11px] text-stone-500">
-            Preferences are not persisted until API integration.
+          <p v-if="showSaveMessage" class="text-center text-[11px] font-semibold text-green-700">
+            Preferences saved successfully!
+          </p>
+
+          <p
+            v-if="errorMessage"
+            class="text-center text-[11px] font-semibold text-red-600"
+            role="alert"
+          >
+            {{ errorMessage }}
           </p>
         </div>
       </div>
