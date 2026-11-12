@@ -54,12 +54,13 @@ model User {
 
   passwordResets PasswordReset[]
 
-  categories      Category[]
-  transactions    Transaction[]
-  budgets         Budget[]
-  refreshSessions RefreshSession[]
-  notifications   Notification[]
-  deviceTokens    DeviceToken[]
+  categories             Category[]
+  transactions           Transaction[]
+  budgets                Budget[]
+  refreshSessions        RefreshSession[]
+  notifications          Notification[]
+  deviceTokens           DeviceToken[]
+  notificationPreference NotificationPreference?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -218,4 +219,25 @@ model BudgetAlertState {
   updatedAt DateTime @updatedAt
 
   @@map("budget_alert_states")
+}
+
+model NotificationPreference {
+  id     Int @id @default(autoincrement())
+  userId Int @unique
+
+  pushNotifications Boolean @default(true)
+
+  budgetAlerts   Boolean @default(true)
+  budgetWarning  Boolean @default(true)
+  budgetExceeded Boolean @default(true)
+
+  monthlyReminders Boolean @default(true)
+  securityAlerts   Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_preferences")
 }

@@ -11,6 +11,11 @@ import {
 } from "./notification.controller.js";
 
 import {
+  getPreferences,
+  savePreferences,
+} from "./notification-preferences.controller.js";
+
+import {
   registerDevice,
   unregisterDevice,
 } from "./device-token.controller.js";
@@ -22,6 +27,10 @@ router.use(authenticateToken);
 // Device routes — before dynamic ID routes
 router.post("/devices", registerDevice);
 router.delete("/devices", unregisterDevice);
+
+// Notification preferences
+router.get("/preferences", getPreferences);
+router.patch("/preferences", savePreferences);
 
 // Notification routes
 router.get("/", getNotifications);
