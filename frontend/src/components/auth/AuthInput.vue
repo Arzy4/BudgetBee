@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Mail, LockKeyhole, UserRound, Eye, EyeOff } from 'lucide-vue-next'
+import { Mail, LockKeyhole, UserRound, Eye, EyeOff, Phone } from 'lucide-vue-next'
 
-type InputType = 'text' | 'email' | 'password'
-type InputIcon = 'email' | 'password' | 'user'
+type InputType = 'text' | 'email' | 'password' | 'tel'
+type InputIcon = 'email' | 'password' | 'user' | 'phone'
 
 const props = withDefaults(
   defineProps<{
@@ -41,14 +41,20 @@ function updateValue(event: Event) {
 
 <template>
   <div
-    class="flex h-[58px] items-center gap-4 rounded-full border border-[#EEE7DC] bg-white/95 px-5 shadow-sm transition-colors focus-within:border-[#F7C64B]"
+    class="flex h-[52px] w-full items-center gap-3 rounded-full border border-[#EEE7DC] bg-white/95 px-4 shadow-sm transition-colors focus-within:border-[#F7C64B] sm:h-[56px] sm:gap-4 sm:px-5 md:h-[58px]"
   >
     <!-- Input icon -->
-    <Mail v-if="icon === 'email'" :size="20" class="shrink-0 text-[#24211D]" />
+    <Mail v-if="icon === 'email'" :size="19" class="shrink-0 text-[#24211D] sm:size-5" />
 
-    <LockKeyhole v-else-if="icon === 'password'" :size="20" class="shrink-0 text-[#24211D]" />
+    <LockKeyhole
+      v-else-if="icon === 'password'"
+      :size="19"
+      class="shrink-0 text-[#24211D] sm:size-5"
+    />
 
-    <UserRound v-else :size="20" class="shrink-0 text-[#24211D]" />
+    <Phone v-else-if="icon === 'phone'" :size="19" class="shrink-0 text-[#24211D]" />
+
+    <UserRound v-else :size="19" class="shrink-0 text-[#24211D] sm:size-5" />
 
     <!-- Input field -->
     <input
@@ -58,7 +64,7 @@ function updateValue(event: Event) {
       :autocomplete="autocomplete"
       :required="required"
       @input="updateValue"
-      class="min-w-0 flex-1 bg-transparent text-sm text-[#24211D] outline-none placeholder:text-[#AAA49C]"
+      class="min-w-0 flex-1 bg-transparent text-[12px] phone:text-[14px] text-[#24211D] outline-none placeholder:text-[#AAA49C]"
     />
 
     <!-- Password visibility -->
@@ -68,7 +74,7 @@ function updateValue(event: Event) {
       :aria-label="showPassword ? 'Hide password' : 'Show password'"
       :aria-pressed="showPassword"
       @click="showPassword = !showPassword"
-      class="flex shrink-0 items-center justify-center text-[#8D857B]"
+      class="flex h-10 w-10 shrink-0 items-center justify-center text-[#8D857B]"
     >
       <EyeOff v-if="showPassword" :size="19" />
       <Eye v-else :size="19" />

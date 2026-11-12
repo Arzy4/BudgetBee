@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 import BottomNavbar from '@/components/layout/BottomNavbar.vue'
@@ -8,6 +8,10 @@ const route = useRoute()
 
 // Select background based on current route
 const backgroundImage = computed(() => {
+  if (route.name === 'transaction-detail') {
+    return '/images/profile-bg.png'
+  }
+
   switch (route.path) {
     case '/dashboard':
     case '/budgets':
@@ -18,6 +22,8 @@ const backgroundImage = computed(() => {
     case '/transactions/add':
     case '/profile/edit':
     case '/profile/change-password':
+    case '/profile/notifications':
+    case '/profile/data-management':
       return '/images/profile-bg.png'
 
     default:

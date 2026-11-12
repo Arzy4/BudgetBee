@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/loginPage/LoginView.vue'
-import RegisterView from '../views/loginPage/RegisterView.vue'
+import LoginView from '../views/authPage/LoginView.vue'
+import RegisterView from '../views/authPage/RegisterView.vue'
 import ProfileView from '../views/profilePage/ProfileView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AddTransactionView from '../views/AddTransactionView.vue'
@@ -11,8 +11,10 @@ import BudgetView from '../views/BudgetView.vue'
 import HistoryView from '../views/historyPage/HistoryView.vue'
 import TransactionDetailView from '../views/historyPage/TransactionDetailView.vue'
 import EditProfileView from '../views/profilePage/EditProfileView.vue'
-import ForgotPasswordView from '@/views/loginPage/ForgotPasswordView.vue'
+import ForgotPasswordView from '@/views/authPage/ForgotPasswordView.vue'
 import ChangePasswordView from '@/views/profilePage/ChangePasswordView.vue'
+import NotificationSettingsView from '@/views/profilePage/NotificationSettingsView.vue'
+import DataManagementView from '@/views/profilePage/DataManagementView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -78,7 +80,7 @@ const router = createRouter({
       component: TransactionDetailView,
       meta: {
         requiresAuth: true,
-        background: 'dashboard',
+        background: 'profile',
       },
     },
     {
@@ -117,6 +119,22 @@ const router = createRouter({
         background: 'profile',
       },
     },
+    {
+      path: '/profile/notifications',
+      name: 'NotificationSettings',
+      component: NotificationSettingsView,
+      meta: { 
+        requiresAuth: true 
+      },
+    },
+    {
+  path: '/profile/data-management',
+  name: 'DataManagement',
+  component: DataManagementView,
+  meta: { 
+    requiresAuth: true 
+  },
+},
   ],
 })
 

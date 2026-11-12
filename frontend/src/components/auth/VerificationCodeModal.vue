@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
-import {
-  ArrowLeft,
-  Clock3,
-  Mail,
-  ShieldCheck,
-  X,
-} from 'lucide-vue-next'
+import { ArrowLeft, Clock3, Mail, ShieldCheck, X } from 'lucide-vue-next'
 
 const props = withDefaults(
   defineProps<{
@@ -33,9 +27,7 @@ const emit = defineEmits<{
 const CODE_LENGTH = 6
 const RESEND_SECONDS = 120
 
-const digits = ref<string[]>(
-  Array(CODE_LENGTH).fill(''),
-)
+const digits = ref<string[]>(Array(CODE_LENGTH).fill(''))
 
 const inputs = ref<HTMLInputElement[]>([])
 const secondsRemaining = ref(RESEND_SECONDS)
@@ -44,9 +36,7 @@ let timer: ReturnType<typeof setInterval> | null = null
 
 const verificationCode = computed(() => digits.value.join(''))
 
-const isCodeComplete = computed(
-  () => verificationCode.value.length === CODE_LENGTH,
-)
+const isCodeComplete = computed(() => verificationCode.value.length === CODE_LENGTH)
 
 const formattedTime = computed(() => {
   const minutes = Math.floor(secondsRemaining.value / 60)
@@ -85,10 +75,7 @@ function focusInput(index: number) {
   })
 }
 
-function setInputRef(
-  element: Element | null,
-  index: number,
-) {
+function setInputRef(element: Element | null, index: number) {
   if (element instanceof HTMLInputElement) {
     inputs.value[index] = element
   }
@@ -110,10 +97,7 @@ function applyDigits(value: string, startIndex: number) {
 
   digits.value = updated
 
-  const nextIndex = Math.min(
-    startIndex + numbers.length,
-    CODE_LENGTH - 1,
-  )
+  const nextIndex = Math.min(startIndex + numbers.length, CODE_LENGTH - 1)
 
   focusInput(nextIndex)
 }
@@ -202,42 +186,45 @@ onUnmounted(stopTimer)
 </script>
 
 <template>
+  <!-- Modal Backdrop -->
   <div
     v-if="open"
-    class="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/45 px-4 py-6 backdrop-blur-[5px]"
+    class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-stone-950/45 px-4 py-4 backdrop-blur-[5px] sm:px-6 sm:py-8"
   >
+    <!-- Modal Container -->
     <section
       role="dialog"
       aria-modal="true"
       aria-labelledby="verification-title"
       aria-describedby="verification-description"
-      class="relative w-full max-w-md rounded-[32px] border border-white/80 bg-[#FFF9F1] px-5 py-8 shadow-2xl shadow-stone-900/20 sm:px-8"
+      class="relative my-auto max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-[24px] border border-white/80 bg-[#FFF9F1] px-4 py-6 shadow-2xl shadow-stone-900/20 sm:max-h-[calc(100dvh-4rem)] sm:rounded-[32px] sm:px-8 sm:py-8"
     >
-      <!-- Close button -->
+      <!-- Close Button -->
       <button
         type="button"
         aria-label="Close verification popup"
-        class="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-amber-900 transition-colors hover:bg-amber-100"
+        class="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-amber-900 transition-colors hover:bg-amber-100 sm:right-5 sm:top-5"
         @click="emit('close')"
       >
-        <X :size="20" />
+        <X :size="19" class="sm:size-5" />
       </button>
 
       <!-- Illustration -->
-      <div class="mb-6 flex justify-center">
+      <div class="mb-5 flex justify-center sm:mb-6">
         <div
-          class="relative flex h-28 w-28 items-center justify-center rounded-full bg-amber-100/70"
+          class="relative flex h-[88px] w-[88px] items-center justify-center rounded-full bg-amber-100/70 sm:h-28 sm:w-28"
         >
           <div
-            class="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#FFE19A] to-[#F9C846] shadow-md shadow-amber-500/20"
+            class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFE19A] to-[#F9C846] shadow-md shadow-amber-500/20 sm:h-20 sm:w-20 sm:rounded-3xl"
           >
-            <Mail :size="39" :stroke-width="1.6" class="text-amber-950" />
+            <Mail :size="31" :stroke-width="1.6" class="text-amber-950 sm:size-10" />
           </div>
 
+          <!-- Shield Badge -->
           <div
-            class="absolute -bottom-1 -right-1 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-[#FFF9F1] bg-white shadow-sm"
+            class="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl border-[3px] border-[#FFF9F1] bg-white shadow-sm sm:h-10 sm:w-10 sm:rounded-2xl"
           >
-            <ShieldCheck :size="20" class="text-amber-600" />
+            <ShieldCheck :size="18" class="text-amber-600 sm:size-5" />
           </div>
         </div>
       </div>
@@ -246,29 +233,26 @@ onUnmounted(stopTimer)
       <div class="text-center">
         <h2
           id="verification-title"
-          class="text-2xl font-extrabold tracking-tight text-stone-900"
+          class="text-[21px] font-extrabold leading-tight tracking-tight text-stone-900 sm:text-2xl"
         >
           Enter Verification Code
         </h2>
 
         <p
           id="verification-description"
-          class="mx-auto mt-3 max-w-xs text-sm leading-6 text-stone-500"
+          class="mx-auto mt-3 max-w-xs text-[13px] leading-[1.6] text-stone-500 sm:text-sm sm:leading-6"
         >
           We've sent a 6-digit verification code to
-          <span class="font-semibold break-all text-stone-800">
-            {{ email }}
-          </span>.
-          Please enter it below to continue.
+          <span class="break-all font-semibold text-stone-800">
+            {{ email }} </span
+          >. Please enter it below to continue.
         </p>
       </div>
 
       <!-- OTP Form -->
-      <form class="mt-7" @submit.prevent="handleVerify">
-        <div
-          class="grid grid-cols-6 gap-2"
-          aria-label="Six-digit verification code"
-        >
+      <form class="mt-6 sm:mt-7" @submit.prevent="handleVerify">
+        <!-- OTP Inputs -->
+        <div class="grid grid-cols-6 gap-1.5 sm:gap-2" aria-label="Six-digit verification code">
           <input
             v-for="(_, index) in digits"
             :key="index"
@@ -281,30 +265,31 @@ onUnmounted(stopTimer)
             autocomplete="one-time-code"
             :aria-label="`Verification digit ${index + 1}`"
             :disabled="loading"
-            class="aspect-square min-w-0 w-full rounded-xl border border-stone-200 bg-white/80 text-center text-xl font-bold text-stone-900 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-200 disabled:opacity-60"
+            class="aspect-square min-w-0 w-full rounded-lg border border-stone-200 bg-white/80 text-center text-[18px] font-bold text-stone-900 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-200 disabled:opacity-60 sm:rounded-xl sm:text-xl"
             @input="handleInput($event, index)"
             @keydown="handleKeydown($event, index)"
             @paste="handlePaste($event, index)"
           />
         </div>
 
-        <!-- Error -->
+        <!-- Error Message -->
         <p
           v-if="error"
           role="alert"
-          class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600"
+          class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-center text-[13px] text-red-600 sm:px-4 sm:py-3 sm:text-sm"
         >
           {{ error }}
         </p>
 
         <!-- Countdown -->
-        <div class="mt-6 flex items-center justify-center gap-2 text-sm">
-          <Clock3 :size="17" class="text-amber-700" />
+        <div
+          class="mt-5 flex flex-wrap items-center justify-center gap-2 text-[13px] sm:mt-6 sm:text-sm"
+        >
+          <Clock3 :size="17" class="shrink-0 text-amber-700" />
 
           <template v-if="secondsRemaining > 0">
-            <span class="text-stone-500">
-              Resend code in
-            </span>
+            <span class="text-stone-500"> Resend code in </span>
+
             <span class="font-bold tabular-nums text-amber-800">
               {{ formattedTime }}
             </span>
@@ -321,20 +306,20 @@ onUnmounted(stopTimer)
           </button>
         </div>
 
-        <!-- Verify -->
+        <!-- Verify Button -->
         <button
           type="submit"
           :disabled="!isCodeComplete || loading"
-          class="mt-7 flex w-full items-center justify-center rounded-2xl bg-[#F9C846] px-5 py-4 text-sm font-bold text-stone-900 shadow-md shadow-amber-500/20 transition-all hover:bg-[#F5BD28] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          class="mt-6 flex h-[52px] w-full items-center justify-center rounded-2xl bg-[#F9C846] px-4 text-sm font-bold text-stone-900 shadow-md shadow-amber-500/20 transition-all hover:bg-[#F5BD28] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:mt-7 sm:h-[56px]"
         >
           {{ loading ? 'Verifying...' : 'Verify Code' }}
         </button>
       </form>
 
-      <!-- Change email -->
+      <!-- Change Email -->
       <button
         type="button"
-        class="mx-auto mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-amber-900 hover:text-amber-600"
+        class="mx-auto mt-4 flex min-h-11 items-center justify-center gap-2 text-[13px] font-semibold text-amber-900 hover:text-amber-600 sm:mt-6 sm:text-sm"
         @click="emit('change-email')"
       >
         <ArrowLeft :size="16" />

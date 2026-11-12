@@ -23,6 +23,7 @@ import {
   getTransactionById,
   updateTransaction,
   updateTransactionReceipt,
+  deleteTransaction,
 } from '@/services/transactions/transactionService'
 import type { ApiTransaction } from '@/services/transactions/transactionService'
 import axios from 'axios'
@@ -48,6 +49,10 @@ const receiptFile = ref<File | null>(null)
 const receiptPreview = ref<string | null>(null)
 const receiptError = ref('')
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024
+
+const isDeleting = ref(false)
+const deleteErrorMessage = ref('')
+const showDeleteModal = ref(false)
 
 interface EditTransactionForm {
   title: string
@@ -154,7 +159,6 @@ const goBack = () => {
   router.push('/histories')
 }
 
-// Receipt image is not yet available from the current API.
 // receiptKey will later be resolved to an accessible image URL.
 const receiptImageUrl = computed(() => transaction.value?.receiptUrl ?? null)
 
@@ -306,10 +310,6 @@ const saveTransaction = async () => {
   }
 }
 
-const handleDelete = () => {
-  console.log('Delete transaction:', transaction.value?.id)
-}
-
 const selectedPayment = computed(() =>
   paymentMethodOptions.find((option) => option.value === editForm.value.paymentMethod),
 )
@@ -415,13 +415,48 @@ function removeSelectedReceipt() {
   receiptPreview.value = null
   receiptError.value = ''
 }
+
+const handleDelete = () => {
+  if (!transaction.value || isDeleting.value) return
+
+  deleteErrorMessage.value = ''
+  showDeleteModal.value = true
+}
+
+const cancelDelete = () => {
+  if (isDeleting.value) return
+
+  showDeleteModal.value = false
+}
+
+const confirmDelete = async () => {
+  if (!transaction.value || isDeleting.value) return
+
+  isDeleting.value = true
+  deleteErrorMessage.value = ''
+
+  try {
+    const id = transaction.value.id
+
+    await deleteTransaction(id)
+
+    console.log('Transaction deleted successfully:', id)
+
+    showDeleteModal.value = false
+
+    await router.replace('/histories')
+  } catch (error) {
+    console.error('Failed to delete transaction:', error)
+
+    deleteErrorMessage.value = 'Unable to delete transaction. Please try again.'
+  } finally {
+    isDeleting.value = false
+  }
+}
 </script>
 
 <template>
-  <main
-    class="flex h-dvh w-full flex-col overflow-hidden bg-[#FBF3E6] bg-cover bg-center bg-no-repeat px-5 pt-9 pb-10"
-    style="background-image: url('/images/dashboard-bg.png')"
-  >
+  <main class="flex h-svh flex-col overflow-hidden bg-cover bg-center bg-no-repeat px-5 py-9 pb-10">
     <div class="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col">
       <!-- Fixed Header -->
       <header class="mb-4 shrink-0">
@@ -1048,19 +1083,87 @@ function removeSelectedReceipt() {
             </section>
 
             <!-- Delete Transaction Button -->
-            <div class="pt-2">
-              <button
-                type="button"
-                class="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-100 px-4 py-4 text-sm font-bold text-red-600 transition-colors hover:bg-red-200"
-                @click="handleDelete"
-              >
-                <Trash2 :size="18" />
-                Delete Transaction
-              </button>
-            </div>
+            <button
+              type="button"
+              :disabled="isDeleting"
+              class="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-100 px-4 py-4 text-sm font-bold text-red-600 transition-colors hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+              @click="handleDelete"
+            >
+              <Trash2 :size="18" />
+              {{ isDeleting ? 'Deleting...' : 'Delete Transaction' }}
+            </button>
+
+            <p v-if="deleteErrorMessage" role="alert" class="mt-3 text-center text-sm text-red-600">
+              {{ deleteErrorMessage }}
+            </p>
           </template>
         </template>
       </div>
     </div>
   </main>
+
+  <!-- Delete Transaction Confirmation Modal -->
+  <Teleport to="body">
+    <Transition name="delete-modal">
+      <div
+        v-if="showDeleteModal"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-5 backdrop-blur-sm"
+        @click.self="cancelDelete"
+      >
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+          aria-describedby="delete-modal-description"
+          class="w-full max-w-sm rounded-3xl bg-[#FFF9EF] p-6 shadow-2xl"
+        >
+          <!-- Delete Icon -->
+          <div class="mb-5 flex justify-center">
+            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <Trash2 :size="30" class="text-red-600" />
+            </div>
+          </div>
+
+          <!-- Modal Title -->
+          <h2 id="delete-modal-title" class="text-center text-xl font-bold text-stone-900">
+            Delete Transaction?
+          </h2>
+
+          <!-- Modal Description -->
+          <p
+            id="delete-modal-description"
+            class="mt-3 text-center text-sm leading-relaxed text-stone-500"
+          >
+            Are you sure you want to delete this transaction? This action cannot be undone.
+          </p>
+
+          <!-- Error Message -->
+          <p v-if="deleteErrorMessage" role="alert" class="mt-4 text-center text-sm text-red-600">
+            {{ deleteErrorMessage }}
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="mt-7 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              :disabled="isDeleting"
+              class="rounded-2xl bg-stone-200 px-4 py-3 text-sm font-bold text-stone-700 disabled:opacity-50"
+              @click="cancelDelete"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              :disabled="isDeleting"
+              class="rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              @click="confirmDelete"
+            >
+              {{ isDeleting ? 'Deleting...' : 'Delete' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>

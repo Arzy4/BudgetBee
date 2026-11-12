@@ -228,49 +228,56 @@ async function handleResendCode() {
 </script>
 
 <template>
-  <main class="relative flex min-h-svh w-full flex-col items-center justify-center px-5 py-12">
+  <main
+    class="relative flex min-h-dvh w-full flex-col items-center justify-center px-5 py-6 sm:px-8 sm:py-12"
+  >
     <div class="w-full max-w-md">
       <Transition name="slide-left" mode="out-in">
         <!-- Forgot Password Card -->
         <section
           v-if="currentStep === 'email'"
-          class="rounded-[32px] border border-white/80 bg-white/55 px-6 py-9 shadow-xl shadow-amber-900/10 backdrop-blur-md sm:px-8"
+          class="rounded-[24px] border border-white/80 bg-white/55 px-5 py-7 shadow-xl shadow-amber-900/10 backdrop-blur-md sm:rounded-[32px] sm:px-8 sm:py-9"
         >
           <!-- Illustration -->
-          <div class="mb-7 flex justify-center">
+          <div class="mb-5 flex justify-center sm:mb-7">
             <div
-              class="relative flex h-28 w-28 items-center justify-center rounded-full bg-amber-100/70"
+              class="relative flex h-24 w-24 items-center justify-center rounded-full bg-amber-100/70 sm:h-28 sm:w-28"
             >
               <div
-                class="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#FFE19A] to-[#F9C846] shadow-md shadow-amber-500/20"
+                class="flex h-[68px] w-[68px] items-center justify-center rounded-3xl bg-gradient-to-br from-[#FFE19A] to-[#F9C846] shadow-md shadow-amber-500/20 sm:h-20 sm:w-20"
               >
-                <Mail :size="39" :stroke-width="1.6" class="text-amber-950" />
+                <Mail :size="34" :stroke-width="1.6" class="text-amber-950 sm:size-10" />
               </div>
 
               <!-- Small lock badge -->
               <div
-                class="absolute -bottom-1 -right-1 flex h-11 w-11 items-center justify-center rounded-2xl border-4 border-[#FFF9EF] bg-white shadow-sm"
+                class="absolute -bottom-1 -right-1 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-[#FFF9EF] bg-white shadow-sm sm:h-11 sm:w-11"
               >
-                <LockKeyhole :size="21" :stroke-width="2" class="text-amber-600" />
+                <LockKeyhole :size="19" :stroke-width="2" class="text-amber-600 sm:size-[21px]" />
               </div>
             </div>
           </div>
 
           <!-- Heading -->
-          <div class="mb-8 text-center">
-            <h2 class="text-[27px] font-extrabold tracking-tight text-stone-900">
+          <div class="mb-6 text-center sm:mb-8">
+            <h2 class="text-[24px] font-extrabold tracking-tight text-stone-900 sm:text-[28px]">
               Forgot Password?
             </h2>
 
-            <p class="mx-auto mt-3 max-w-xs text-sm leading-6 text-stone-500">
+            <p
+              class="mx-auto mt-3 max-w-xs text-[13px] leading-[1.6] text-stone-500 sm:text-sm sm:leading-6"
+            >
               Enter your registered email address to receive a verification code.
             </p>
           </div>
 
           <!-- Email Form -->
-          <form class="space-y-5" @submit.prevent="handleRequestPasswordReset">
+          <form class="space-y-4 sm:space-y-5" @submit.prevent="handleRequestPasswordReset">
             <div>
-              <label for="email" class="mb-2 block text-sm font-semibold text-stone-800">
+              <label
+                for="email"
+                class="mb-2 block text-[13px] font-semibold text-stone-800 sm:text-sm"
+              >
                 Email Address
               </label>
 
@@ -288,7 +295,7 @@ async function handleResendCode() {
                   required
                   :disabled="isLoading"
                   placeholder="Enter your email address"
-                  class="w-full rounded-2xl border border-stone-200 bg-white/70 py-3.5 pl-12 pr-4 text-sm text-stone-900 outline-none transition-all placeholder:text-stone-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-200/50 disabled:opacity-60"
+                  class="h-[52px] w-full rounded-2xl border border-stone-200 bg-white/70 pl-12 pr-4 text-base text-stone-900 outline-none transition-all placeholder:text-stone-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-200/50 disabled:opacity-60 sm:h-[56px]"
                 />
               </div>
             </div>
@@ -297,7 +304,7 @@ async function handleResendCode() {
             <p
               v-if="errorMessage"
               role="alert"
-              class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+              class="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] text-red-600 sm:px-4 sm:py-3 sm:text-sm"
             >
               {{ errorMessage }}
             </p>
@@ -306,7 +313,7 @@ async function handleResendCode() {
             <p
               v-if="successMessage"
               role="status"
-              class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+              class="rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 text-[13px] text-green-700 sm:px-4 sm:py-3 sm:text-sm"
             >
               {{ successMessage }}
             </p>
@@ -315,22 +322,22 @@ async function handleResendCode() {
             <button
               type="submit"
               :disabled="isLoading"
-              class="flex w-full items-center justify-center gap-3 rounded-2xl bg-[#F9C846] px-5 py-4 text-sm font-bold text-stone-900 shadow-md shadow-amber-500/20 transition-all hover:bg-[#F5BD28] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              class="flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-[#F9C846] px-3 text-[13px] font-bold text-stone-900 shadow-md shadow-amber-500/20 transition-all hover:bg-[#F5BD28] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:h-[56px] sm:gap-3 sm:px-5 sm:text-sm"
             >
-              <Send v-if="!isLoading" :size="18" />
+              <Send v-if="!isLoading" :size="17" class="shrink-0 sm:size-[18px]" />
 
               <span>
                 {{ isLoading ? 'Sending Code...' : 'Send Verification Code' }}
               </span>
 
-              <ArrowRight v-if="!isLoading" :size="18" />
+              <ArrowRight v-if="!isLoading" :size="17" class="shrink-0 sm:size-[18px]" />
             </button>
           </form>
 
           <!-- Back to Login -->
           <button
             type="button"
-            class="mx-auto mt-7 flex items-center justify-center gap-2 text-sm font-semibold transition-colors hover:text-amber-600"
+            class="mx-auto mt-5 flex min-h-11 items-center justify-center gap-2 text-[13px] font-semibold transition-colors hover:text-amber-600 sm:mt-7 sm:text-sm"
             @click="goToLogin"
           >
             <ArrowLeft :size="17" />
@@ -338,6 +345,7 @@ async function handleResendCode() {
           </button>
         </section>
 
+        <!-- Reset Password / Success Screen -->
         <ResetPasswordView
           v-else-if="currentStep === 'reset' || currentStep === 'success'"
           :is-loading="isLoading"
@@ -351,6 +359,7 @@ async function handleResendCode() {
     </div>
   </main>
 
+  <!-- Verification Code Modal -->
   <VerificationCodeModal
     ref="verificationModalRef"
     :open="isVerificationModalOpen"

@@ -17,16 +17,11 @@ import {
 // Access the transaction store
 const transactionStore = useTransactionStore()
 
-const { monthlyTransactions, isLoading, errorMessage } =
-  storeToRefs(transactionStore)
+const { monthlyTransactions, isLoading, errorMessage } = storeToRefs(transactionStore)
 
 const recentTransactions = computed(() => {
   return [...monthlyTransactions.value]
-    .sort(
-      (a, b) =>
-        new Date(b.date).getTime() -
-        new Date(a.date).getTime(),
-    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 2)
 })
 
@@ -111,75 +106,66 @@ const getIconStyle = (category: string) => {
 
 <template>
   <section
-    class="w-full rounded-3xl border border-white/40 bg-white/40 p-4 shadow-lg shadow-amber-900/5 backdrop-blur-md h-[25svh]"
+    class="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[22px] border border-white/40 bg-white/40 px-3 pt-6 shadow-lg shadow-amber-900/5 backdrop-blur-md sm:px-4"
   >
     <!-- Header -->
-    <div class="mb-3 flex items-center justify-between">
-      <h2 class="text-lg font-bold text-stone-900">Recent Transactions</h2>
+    <div class="mb-2 flex shrink-0 items-center justify-between">
+      <h2 class="text-[14px] phone:text-[16px] font-bold text-stone-900">Recent Transactions</h2>
 
       <RouterLink
         to="/histories"
-        class="flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700"
+        class="flex items-center gap-1 text-[11px] phone:text-[12px] font-semibold text-amber-600"
       >
         See all
-        <ChevronRight :size="16" />
+        <ChevronRight :size="14" />
       </RouterLink>
     </div>
 
     <!-- Loading State -->
-    <p v-if="isLoading" class="flex justify-center items-center h-full pb-17 text-center text-sm text-stone-500">Loading transactions...</p>
+    <p v-if="isLoading" class="h-full flex justify-center items-center pb-12 text-[14px] phone:text-[16px] text-stone-500">Loading transactions...</p>
 
-    <!-- Error State -->
-    <p v-else-if="errorMessage" role="alert" class="py-8 text-center text-sm text-red-500">
+    <p v-else-if="errorMessage" role="alert" class="h-full flex justify-center items-center pb-12 text-[14px] phone:text-[16px] text-red-500">
       {{ errorMessage }}
     </p>
 
-    <!-- Empty State -->
-    <p v-else-if="recentTransactions.length === 0" class="flex justify-center items-center h-full pb-17 text-center text-sm text-stone-500">
+    <p v-else-if="recentTransactions.length === 0" class="h-full flex justify-center items-center pb-12 text-[14px] phone:text-[16px] text-stone-500">
       No transactions yet.
     </p>
 
     <!-- Transaction List -->
-    <div v-else class="divide-y divide-stone-200/60">
+    <div v-else class="min-h-0 flex-1 overflow-y-auto divide-y divide-stone-200/60">
       <div
         v-for="transaction in recentTransactions"
         :key="transaction.id"
-        class="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+        class="flex min-w-0 items-center gap-2 py-4"
       >
         <!-- Category Icon -->
         <div
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full my-2"
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
           :style="getIconStyle(transaction.category.name)"
         >
-          <component
-            :is="getTransactionIcon(transaction.category.name)"
-            :size="21"
-            :stroke-width="1.8"
-          />
+          <component :is="getTransactionIcon(transaction.category.name)" :size="17" />
         </div>
 
-        <!-- Description -->
+        <!-- Title -->
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium text-stone-900">
-            {{ transaction.title || transaction.category.name }}
+          <p class="truncate text-[11px] phone:text-[12px] font-semibold text-stone-900">
+            {{ transaction.title}}
           </p>
-
-          <p class="truncate text-xs text-stone-500">
-            {{ transaction.category.name }} ·
-            {{ transaction.type === 'INCOME' ? 'Income' : 'Expense' }}
+          <p class="truncate text-[10px] phone:text-[11px] text-stone-500">
+            {{ transaction.category.name }}
           </p>
         </div>
 
-        <!-- Amount and Date -->
+        <!-- Amount -->
         <div class="shrink-0 text-right">
           <p
-            class="text-sm font-semibold"
+            class="text-[11px] phone:text-[12px] font-semibold"
             :class="transaction.type === 'INCOME' ? 'text-emerald-600' : 'text-red-500'"
           >
             {{ transaction.type === 'INCOME' ? '+' : '−' }}{{ formatCurrency(transaction.amount) }}
           </p>
-
-          <p class="mt-1 text-xs text-stone-400">
+          <p class="text-[10px] phone:text-[11px] text-stone-400">
             {{ formatDate(transaction.date) }}
           </p>
         </div>

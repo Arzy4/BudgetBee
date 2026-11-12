@@ -377,96 +377,124 @@ onMounted(fetchBudgets)
 
 <template>
   <main
-    class="relative min-h-screen w-full px-5 py-9"
+    class="relative h-dvh w-full overflow-hidden px-4 pt-8 phone:px-6 phone:pt-10 pb-[calc(80px+env(safe-area-inset-bottom)+16px)] phone:pb-[calc(80px+env(safe-area-inset-bottom)+20px)]"
   >
-    <div class="mx-auto max-w-lg space-y-4">
+    <div
+      class="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col gap-3 phone:gap-4 sm:gap-5"
+    >
       <!-- Header -->
-      <header class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-stone-800">My Budgets</h1>
-          <p class="mt-1 text-sm text-stone-500">Plan your spending wisely</p>
+      <header class="flex shrink-0 items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h1
+            class="text-[20px] font-bold leading-tight text-stone-800 phone:text-[24px] sm:text-2xl"
+          >
+            My Budgets
+          </h1>
+
+          <p
+            class="mt-1 leading-4 text-stone-500 text-[11px] phone:text-[12px] sm:text-sm"
+          >
+            Plan your spending wisely
+          </p>
         </div>
 
-        <div class="flex p-3 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm">
-          <CalendarDays :size="22" class="text-amber-600" />
+        <div
+          class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm xs:size-11 phone:size-12"
+        >
+          <CalendarDays class="text-amber-600 size-[22px] phone:size-[28px]" :stroke-width="1.9"/>
         </div>
       </header>
 
       <!-- Month Navigation -->
-      <div class="flex items-center justify-center gap-6">
+      <div class="flex h-10 shrink-0 items-center justify-between px-4 sm:px-8">
         <button
           type="button"
           aria-label="Previous month"
-          class="rounded-full p-2 text-stone-500 hover:bg-white"
+          class="flex size-10 items-center justify-center rounded-full text-stone-500 hover:bg-white/60"
           @click="previousMonth"
         >
-          <ChevronLeft :size="22" />
+          <ChevronLeft class="size-[21px] phone:size-[25px]" />
         </button>
 
-        <h2 class="min-w-36 text-center font-semibold text-stone-700">
+        <h2
+          class="text-center text-[14px] font-semibold text-stone-700 phone:text-[16px]"
+        >
           {{ formattedMonth }}
         </h2>
 
         <button
           type="button"
           aria-label="Next month"
-          class="rounded-full p-2 text-stone-500 hover:bg-white"
+          class="flex h-10 w-10 items-center justify-center rounded-full text-stone-500 hover:bg-white/60"
           @click="nextMonth"
         >
-          <ChevronRight :size="22" />
+          <ChevronRight class="size-[21px] phone:size-[25px]" />
         </button>
       </div>
 
       <!-- Monthly Budget Overview -->
-      <section class="rounded-3xl bg-[#F9CB54]/90 p-6 shadow-sm">
-        <h3 class="text-sm font-semibold text-amber-900">Monthly Budget Overview</h3>
+      <section
+        class="shrink-0 rounded-[22px] bg-[#F9CB54]/90 px-4 py-3 shadow-sm phone:px-5 phone:py-4 sm:rounded-3xl sm:p-6"
+      >
+        <h3 class="text-[12px] font-semibold text-amber-900 phone:text-[14px]">
+          Monthly Budget Overview
+        </h3>
 
         <!-- Total Remaining -->
-        <div class="mt-5 text-center">
-          <p class="text-xs text-amber-900/75">Total Remaining</p>
+        <div class="mt-3 text-center phone:mt-4 sm:mt-5">
+          <p class="text-[11px] text-amber-900/75 phone:text-[12px]">Total Remaining</p>
 
           <div
             v-if="isLoading"
-            class="mx-auto mt-2 h-9 w-48 animate-pulse rounded-lg bg-amber-900/15"
+            class="mx-auto mt-2 h-7 w-36 animate-pulse rounded-lg bg-amber-900/15 phone:h-9 phone:w-48"
           ></div>
 
-          <h2 v-else class="mt-1 text-3xl font-bold text-amber-950">
+          <h2
+            v-else
+            class="mt-1 break-words text-[24px] font-bold leading-tight text-amber-950 phone:text-[28px] phone-lg:text-[30px]"
+          >
             {{ formatCurrency(summary?.totalRemaining ?? '0') }}
           </h2>
         </div>
 
         <!-- Budget and Spent -->
-        <div class="mt-6 grid grid-cols-2 gap-4 text-center">
-          <div>
-            <p class="text-xs text-amber-900/75">Total Budget</p>
+        <div class="mt-4 grid grid-cols-2 gap-3 text-center phone:mt-5 sm:mt-6 sm:gap-4">
+          <div class="min-w-0">
+            <p class="text-[10px] text-amber-900/75 phone:text-[11px]">Total Budget</p>
 
             <div
               v-if="isLoading"
-              class="mx-auto mt-2 h-5 w-28 animate-pulse rounded bg-amber-900/15"
+              class="mx-auto mt-2 h-5 w-full max-w-28 animate-pulse rounded bg-amber-900/15"
             ></div>
 
-            <p v-else class="mt-1 font-semibold text-amber-950">
+            <p
+              v-else
+              class="mt-1 break-words text-[14px] font-semibold leading-tight text-amber-950 phone:text-[16px]"
+            >
               {{ formatCurrency(summary?.totalBudget ?? '0') }}
             </p>
           </div>
 
-          <div>
-            <p class="text-xs text-amber-900/75">Spent</p>
+          <div class="min-w-0">
+            <p class="text-[10px] text-amber-900/75 phone:text-[11px]">Spent</p>
 
             <div
               v-if="isLoading"
-              class="mx-auto mt-2 h-5 w-28 animate-pulse rounded bg-amber-900/15"
+              class="mx-auto mt-2 h-5 w-full max-w-28 animate-pulse rounded bg-amber-900/15"
             ></div>
 
-            <p v-else class="mt-1 font-semibold text-amber-950">
+            <p
+              v-else
+              class="mt-1 break-words text-[14px] font-semibold leading-tight text-amber-950 phone:text-[16px]"
+            >
               {{ formatCurrency(summary?.totalSpent ?? '0') }}
             </p>
           </div>
         </div>
 
         <!-- Progress Bar -->
-        <div class="mt-6">
-          <div class="h-2.5 overflow-hidden rounded-full bg-amber-600/25">
+        <div class="mt-4 phone:mt-5 sm:mt-6">
+          <div class="h-2 overflow-hidden rounded-full bg-amber-600/25 phone:h-2.5">
             <div
               v-if="isLoading"
               class="h-full w-full animate-pulse rounded-full bg-amber-900/15"
@@ -484,7 +512,7 @@ onMounted(fetchBudgets)
             class="mt-2 ml-auto h-3 w-16 animate-pulse rounded bg-amber-900/15"
           ></div>
 
-          <p v-else class="mt-2 text-right text-xs font-medium text-amber-900">
+          <p v-else class="mt-2 text-right text-[10px] font-medium text-amber-900 phone:text-[11px]">
             {{ summary?.percentageUsed ?? 0 }}% used
           </p>
         </div>
@@ -492,15 +520,19 @@ onMounted(fetchBudgets)
 
       <!-- Category Budgets Content -->
       <section
-        class="mt-4 flex h-[35.5svh] w-full flex-col rounded-3xl border border-white/40 bg-white/40 p-4 shadow-lg shadow-amber-900/5 backdrop-blur-md"
+        class="flex min-h-0 w-full flex-1 flex-col rounded-3xl border border-white/40 bg-white/40 p-4 shadow-lg shadow-amber-900/5 backdrop-blur-md"
       >
         <!-- Category Budgets Header -->
-        <div class="flex shrink-0 items-center justify-between gap-3 pb-4">
-          <h2 class="text-lg font-bold text-stone-900">Category Budgets</h2>
+        <div class="flex shrink-0 items-center justify-between gap-2 pb-3 phone:pb-4">
+          <h2
+            class="min-w-0 text-[14px] font-bold text-stone-900  phone:text-[16px]"
+          >
+            Category Budgets
+          </h2>
 
           <button
             type="button"
-            class="flex shrink-0 items-center gap-1 rounded-full bg-[#F9CB54] px-4 py-2 text-xs font-semibold text-amber-950"
+            class="flex min-h-9 shrink-0 items-center justify-center rounded-full bg-[#F9CB54] px-3 py-2 text-[11px] font-semibold text-amber-950 phone:px-4 phone:text-[12px]"
             @click="openManageBudget"
           >
             Manage
@@ -509,7 +541,7 @@ onMounted(fetchBudgets)
 
         <!-- Loading State -->
         <div v-if="isLoading" class="flex h-full flex-col items-center justify-center gap-4">
-          <p class="pb-10 text-center text-sm text-stone-500">Loading budgets...</p>
+          <p class="pb-10 text-center text-[14px] phone:text-[16px] text-stone-500">Loading budgets...</p>
         </div>
 
         <!-- Error State -->
@@ -517,11 +549,11 @@ onMounted(fetchBudgets)
           v-else-if="errorMessage"
           class="flex h-full flex-col items-center justify-center text-center"
         >
-          <p class="text-sm text-red-600">
+          <p class="text-[14px] phone:text-[16px] text-red-600">
             {{ errorMessage }}
           </p>
 
-          <button type="button" class="mt-3 font-semibold text-amber-700" @click="fetchBudgets">
+          <button type="button" class="mt-3 font-semibold text-amber-700 text-[14px] phone:text-[16px]" @click="fetchBudgets">
             Try Again
           </button>
         </div>
@@ -531,11 +563,16 @@ onMounted(fetchBudgets)
           v-else-if="!budgetData || budgetData.budgets.length === 0"
           class="flex h-full flex-col items-center justify-center text-center"
         >
-          <p class="pb-10 text-center text-sm text-stone-500">No budgets created for this month yet.</p>
+          <p class="pb-10 text-center text-[14px] phone:text-[16px] text-stone-500">
+            No budgets created for this month yet.
+          </p>
         </div>
 
         <!-- Scrollable Category List -->
-        <div v-else class="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1">
+        <div
+          v-else
+          class="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1 phone:space-y-3"
+        >
           <!-- Individual Budget Cards -->
           <div
             v-for="budget in budgetData.budgets"
@@ -550,14 +587,13 @@ onMounted(fetchBudgets)
               >
                 <component
                   :is="getCategoryIcon(budget.category.name)"
-                  :size="20"
-                  class="text-amber-600"
+                  class="size-[18px] text-amber-600 phone:size-[20px]"
                 />
               </div>
 
               <!-- Category Name -->
               <div class="min-w-0 flex-1">
-                <h3 class="truncate text-sm font-semibold text-stone-800">
+                <h3 class="truncate text-[14px] phone:text-[16px] font-semibold text-stone-800">
                   {{ budget.category.name }}
                 </h3>
               </div>
@@ -565,7 +601,7 @@ onMounted(fetchBudgets)
               <!-- Budget Status -->
               <div class="shrink-0 text-right">
                 <p
-                  class="text-[10px] font-medium"
+                  class="text-[10px] phone:text-[11px] font-medium"
                   :class="
                     budget.status === 'OVER_BUDGET' || budget.status === 'LIMIT_REACHED'
                       ? 'text-red-600'
@@ -608,12 +644,12 @@ onMounted(fetchBudgets)
             </div>
 
             <!-- Financial Details -->
-            <div class="flex items-end justify-between gap-3">
+            <div class="grid grid-cols-2 gap-2 phone:gap-3">
               <!-- Spent / Budget (Bottom Left) -->
               <div class="min-w-0">
-                <p class="text-[10px] text-stone-400">Spent / Budget</p>
+                <p class="text-[10px] phone:text-[11px] text-stone-400">Spent / Budget</p>
 
-                <p class="mt-0.5 text-xs font-medium text-stone-700">
+                <p class="mt-0.5 text-[11px] phone:text-[12px] font-medium text-stone-700">
                   {{ formatCurrency(budget.spent) }}
                   /
                   {{ formatCurrency(budget.amount) }}
@@ -621,11 +657,11 @@ onMounted(fetchBudgets)
               </div>
 
               <!-- Remaining (Bottom Right) -->
-              <div class="shrink-0 text-right">
-                <p class="text-[10px] text-stone-400">Remaining</p>
+              <div class="min-w-0 text-right">
+                <p class="text-[10px] phone:text-[11px] text-stone-400">Remaining</p>
 
                 <p
-                  class="mt-0.5 text-xs font-semibold"
+                  class="mt-0.5 text-[12px] phone:text-[14px] font-semibold"
                   :class="budget.status === 'OVER_BUDGET' ? 'text-red-600' : 'text-stone-700'"
                 >
                   {{ formatCurrency(budget.remaining) }}
@@ -641,19 +677,19 @@ onMounted(fetchBudgets)
   <!-- Manage Budgets Modal -->
   <div
     v-if="isManageBudgetOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 xs:px-4"
     @click.self="closeManageBudget"
   >
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="manage-budget-title"
-      class="flex max-h-[85dvh] w-full max-w-md flex-col rounded-3xl bg-[#FFF8ED] p-4 shadow-xl"
+      class="flex max-h-[min(85dvh,700px)] w-full max-w-md min-h-0 flex-col overflow-hidden rounded-[22px] bg-[#FFF8ED] p-3 shadow-xl xs:p-4 phone:rounded-3xl"
     >
       <!-- Header -->
       <div class="mb-4 flex shrink-0 items-center justify-between">
         <div>
-          <h2 id="manage-budget-title" class="text-lg font-bold text-stone-900">
+          <h2 id="manage-budget-title" class="text-[18px] phone:text-[20px] font-bold text-stone-900">
             {{
               isAddBudgetOpen
                 ? editingBudgetId !== null
@@ -663,7 +699,7 @@ onMounted(fetchBudgets)
             }}
           </h2>
 
-          <p class="mt-1 text-xs text-stone-500">
+          <p class="mt-1 text-[12px] phone:text-[14px] text-stone-500">
             {{ formattedMonth }}
           </p>
         </div>
@@ -694,7 +730,7 @@ onMounted(fetchBudgets)
           <!-- Empty State -->
           <p
             v-if="!budgetData || budgetData.budgets.length === 0"
-            class="py-8 text-center text-sm text-stone-500"
+            class="py-8 text-center text-[14px] phone:text-[16px] text-stone-500"
           >
             No budgets created for this month yet.
           </p>
@@ -707,11 +743,11 @@ onMounted(fetchBudgets)
           >
             <!-- Category and Amount -->
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-medium text-stone-900">
+              <p class="truncate text-[14px] phone:text-[16px] font-medium text-stone-900">
                 {{ budget.category.name }}
               </p>
 
-              <p class="mt-1 text-xs text-stone-500">
+              <p class="mt-1 text-[12px] phone:text-[14px] text-stone-500">
                 {{ formatCurrency(budget.amount) }}
               </p>
             </div>
@@ -740,10 +776,10 @@ onMounted(fetchBudgets)
       </div>
 
       <!-- Add Budget Form -->
-      <form v-else class="flex min-h-0 flex-1 flex-col" @submit.prevent="handleSaveBudget">
+      <form v-else class="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain" @submit.prevent="handleSaveBudget">
         <!-- Expense Category -->
         <div>
-          <label id="budget-category-label" class="mb-2 block text-sm font-semibold text-stone-700">
+          <label id="budget-category-label" class="mb-2 block text-[14px] phone:text-[16px] font-semibold text-stone-700">
             Expense Category
           </label>
 
@@ -770,7 +806,7 @@ onMounted(fetchBudgets)
                 </div>
 
                 <span
-                  class="truncate text-sm"
+                  class="truncate text-[14px] phone:text-[16px]"
                   :class="selectedCategory ? 'font-medium text-stone-800' : 'text-stone-400'"
                 >
                   {{ selectedCategory?.name ?? 'Select expense category' }}
@@ -808,7 +844,7 @@ onMounted(fetchBudgets)
                     class="shrink-0 text-amber-600"
                   />
 
-                  <span class="truncate text-sm font-medium text-stone-700">
+                  <span class="truncate text-[14px] phone:text-[16px] font-medium text-stone-700">
                     {{ category.name }}
                   </span>
                 </div>
@@ -825,7 +861,7 @@ onMounted(fetchBudgets)
           <!-- Empty Category State -->
           <p
             v-if="availableCategories.length === 0 && !createBudgetError"
-            class="mt-2 text-xs text-stone-500"
+            class="mt-2 text-[12px] phone:text-[14px] text-stone-500"
           >
             No available expense categories for this month.
           </p>
@@ -833,14 +869,14 @@ onMounted(fetchBudgets)
 
         <!-- Budget Amount -->
         <div class="mt-4">
-          <label for="budget-amount" class="mb-2 block text-sm font-semibold text-stone-700">
+          <label for="budget-amount" class="mb-2 block text-[14px] phone:text-[16px] font-semibold text-stone-700">
             Budget Amount
           </label>
 
           <div
             class="flex items-center rounded-2xl border border-stone-200 bg-white px-4 focus-within:border-amber-400"
           >
-            <span class="text-sm font-semibold text-stone-500"> Rp </span>
+            <span class="text-[14px] phone:text-[16px] font-semibold text-stone-500"> Rp </span>
 
             <input
               id="budget-amount"
@@ -850,13 +886,13 @@ onMounted(fetchBudgets)
               step="1"
               required
               placeholder="Enter budget amount"
-              class="w-full bg-transparent px-3 py-3 text-sm text-stone-800 outline-none"
+              class="w-full bg-transparent px-3 py-3 text-[14px] phone:text-[16px] text-stone-800 outline-none"
             />
           </div>
         </div>
 
         <!-- Error Message -->
-        <p v-if="createBudgetError" role="alert" class="mt-3 text-xs text-red-600">
+        <p v-if="createBudgetError" role="alert" class="mt-3 text-[12px] phone:text-[14px] text-red-600">
           {{ createBudgetError }}
         </p>
 
@@ -865,7 +901,7 @@ onMounted(fetchBudgets)
           <button
             type="button"
             :disabled="isCreatingBudget"
-            class="flex-1 rounded-full bg-stone-200 py-3 text-sm font-semibold text-stone-700 hover:bg-stone-300 disabled:opacity-50"
+            class="flex-1 rounded-full bg-stone-200 py-3 text-[14px] phone:text-[16px] font-semibold text-stone-700 hover:bg-stone-300 disabled:opacity-50"
             @click="closeAddBudget"
           >
             Back
@@ -874,7 +910,7 @@ onMounted(fetchBudgets)
           <button
             type="submit"
             :disabled="isCreatingBudget || availableCategories.length === 0"
-            class="flex-1 rounded-full bg-[#FFBA08] py-3 text-sm font-semibold text-stone-900 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+            class="flex-1 rounded-full bg-[#FFBA08] py-3 text-[14px] phone:text-[16px] font-semibold text-stone-900 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {{
               isCreatingBudget
@@ -900,14 +936,14 @@ onMounted(fetchBudgets)
       aria-labelledby="delete-budget-title"
       class="w-full max-w-sm rounded-3xl bg-[#FFF8ED] p-5 shadow-xl"
     >
-      <h2 id="delete-budget-title" class="text-lg font-bold text-stone-900">Delete Budget?</h2>
+      <h2 id="delete-budget-title" class="text-[18px] phone:text-[20px] font-bold text-stone-900">Delete Budget?</h2>
 
-      <p class="mt-3 text-sm text-stone-600">
+      <p class="mt-3 text-[14px] phone:text-[16px] text-stone-600">
         Are you sure you want to delete this budget? Your transactions and expense category will not
         be deleted.
       </p>
 
-      <p v-if="deleteBudgetError" role="alert" class="mt-3 text-xs text-red-600">
+      <p v-if="deleteBudgetError" role="alert" class="mt-3 text-[12px] phone:text-[14px] text-red-600">
         {{ deleteBudgetError }}
       </p>
 
@@ -915,7 +951,7 @@ onMounted(fetchBudgets)
         <button
           type="button"
           :disabled="isDeletingBudget"
-          class="flex-1 rounded-full bg-stone-200 py-3 text-sm font-semibold text-stone-700 disabled:opacity-50"
+          class="flex-1 rounded-full bg-stone-200 py-3 text-[14px] phone:text-[16px] font-semibold text-stone-700 disabled:opacity-50"
           @click="closeDeleteBudget"
         >
           Cancel
@@ -924,7 +960,7 @@ onMounted(fetchBudgets)
         <button
           type="button"
           :disabled="isDeletingBudget"
-          class="flex-1 rounded-full bg-red-500 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          class="flex-1 rounded-full bg-red-500 py-3 text-[14px] phone:text-[16px] font-semibold text-white disabled:opacity-50"
           @click="handleDeleteBudget"
         >
           {{ isDeletingBudget ? 'Deleting...' : 'Delete' }}

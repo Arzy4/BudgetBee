@@ -194,12 +194,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main
-    class="flex h-svh flex-col overflow-hidden bg-cover bg-center bg-no-repeat px-5 py-9 pb-10"
-  >
+  <main class="flex h-svh flex-col overflow-hidden bg-cover bg-center bg-no-repeat px-5 pt-9 pb-10">
     <div class="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">
       <!-- Fixed Header -->
-      <header class="mb-4 flex shrink-0 items-center gap-4">
+      <header class="flex shrink-0 items-center gap-4">
         <button
           type="button"
           aria-label="Go back"
@@ -212,29 +210,27 @@ onUnmounted(() => {
 
       <!-- Page Content -->
       <div class="flex min-h-0 flex-1 flex-col">
-        <div class="text-center pb-6">
-          <!-- Page Title -->
-          <h1 class="shrink-0 text-xl font-bold text-stone-900">Edit Profile</h1>
+        <!-- Page Title -->
+        <div class="shrink-0 pb-6 text-center">
+          <h1 class="text-[20px] phone:text-[24px] font-bold text-stone-900">Edit Profile</h1>
 
-          <div class="h-3 mt-1">
-            <p
-              v-if="submitError"
-              role="alert"
-              class="mb-4 rounded-xl bg-red-50/90 px-4 py-3 text-center text-sm text-red-700"
-            >
-              {{ submitError }}
-            </p>
-          </div>
-
-          <p class="mt-1 text-xs text-stone-500">Keep your account details up to date</p>
+          <p class="mt-1 text-[11px] phone:text-[12px] text-stone-500">Keep your account details up to date</p>
         </div>
 
+        <!-- Error Message -->
+        <p
+          v-if="submitError"
+          role="alert"
+          class="mb-3 shrink-0 rounded-xl bg-red-50/90 px-4 py-3 text-[14px] phone:text-[16px] text-red-700"
+        >
+          {{ submitError }}
+        </p>
+
         <!-- Scrollable Content -->
-        <div class="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain pb-6">
-          <!-- Edit Profile Form -->
+        <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <form
             id="edit-profile-form"
-            class="h-[65svh] space-y-5 rounded-3xl border border-white/80 bg-white/20 p-5 shadow-sm backdrop-blur-sm"
+            class="space-y-5 rounded-3xl border border-white/80 bg-white/20 p-5 shadow-sm backdrop-blur-sm"
             @submit.prevent="handleSave"
           >
             <!-- Profile Avatar -->
@@ -281,21 +277,21 @@ onUnmounted(() => {
                 </span>
               </button>
 
-              <p class="mt-4 text-xs font-medium text-stone-600">
+              <p class="mt-4 text-[12px] phone:text-[14px] font-medium text-stone-600">
                 Tap to change your profile picture
               </p>
 
               <p class="mt-1 text-[11px] text-stone-400">JPG, PNG or WebP · Max 2 MB</p>
 
               <!-- Image Validation Error -->
-              <p v-if="imageError" role="alert" class="mt-3 text-xs font-medium text-red-600">
+              <p v-if="imageError" role="alert" class="mt-3 text-[12px] phone:text-[14px] font-medium text-red-600">
                 {{ imageError }}
               </p>
             </section>
 
             <!-- Full Name -->
             <div>
-              <label for="fullName" class="mb-2 block text-sm font-semibold text-stone-700">
+              <label for="fullName" class="mb-2 block text-[14px] phone:text-[16px] font-semibold text-stone-700">
                 Full Name
               </label>
 
@@ -307,7 +303,7 @@ onUnmounted(() => {
                 placeholder="Enter your full name"
                 :aria-invalid="!!fullNameError"
                 :aria-describedby="fullNameError ? 'fullName-error' : undefined"
-                class="w-full rounded-2xl border bg-white/70 px-4 py-3 text-sm text-stone-900 outline-none transition focus:ring-2"
+                class="w-full rounded-2xl border bg-white/70 px-4 py-3 text-[14px] phone:text-[16px] text-stone-900 outline-none transition focus:ring-2"
                 :class="
                   fullNameError
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-100'
@@ -322,7 +318,7 @@ onUnmounted(() => {
                   v-if="fullNameError"
                   id="fullName-error"
                   role="alert"
-                  class="ml-1 text-xs font-medium text-red-600"
+                  class="ml-1 text-[12px] phone:text-[14px] font-medium text-red-600"
                 >
                   {{ fullNameError }}
                 </p>
@@ -331,7 +327,7 @@ onUnmounted(() => {
 
             <!-- Email Address -->
             <div>
-              <label for="email" class="mb-2 block text-sm font-semibold text-stone-700">
+              <label for="email" class="mb-2 block text-[14px] phone:text-[16px] font-semibold text-stone-700">
                 Email Address
               </label>
 
@@ -341,7 +337,7 @@ onUnmounted(() => {
                   :value="authStore.user?.email ?? ''"
                   type="email"
                   disabled
-                  class="w-full rounded-2xl border border-stone-200 bg-stone-100/70 px-4 py-3 pr-12 text-sm text-stone-500"
+                  class="w-full rounded-2xl border border-stone-200 bg-stone-100/70 px-4 py-3 pr-12 text-[14px] phone:text-[16px] text-stone-500"
                 />
 
                 <LockKeyhole
@@ -350,12 +346,12 @@ onUnmounted(() => {
                 />
               </div>
 
-              <p class="mt-2 text-xs text-stone-500">Your email address cannot be changed.</p>
+              <p class="mt-2 text-[12px] phone:text-[14px] text-stone-500">Your email address cannot be changed.</p>
             </div>
 
             <!-- Phone Number -->
             <div>
-              <label for="phoneNumber" class="mb-2 block text-sm font-semibold text-stone-700">
+              <label for="phoneNumber" class="mb-2 block text-[14px] phone:text-[16px] font-semibold text-stone-700">
                 Phone Number
               </label>
 
@@ -367,7 +363,7 @@ onUnmounted(() => {
                 placeholder="Enter your phone number"
                 :aria-invalid="!!phoneNumberError"
                 :aria-describedby="phoneNumberError ? 'phoneNumber-error' : undefined"
-                class="w-full rounded-2xl border bg-white/70 px-4 py-3 text-sm text-stone-900 outline-none transition focus:ring-2"
+                class="w-full rounded-2xl border bg-white/70 px-4 py-3 text-[14px] phone:text-[16px] text-stone-900 outline-none transition focus:ring-2"
                 :class="
                   phoneNumberError
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-100'
@@ -381,36 +377,36 @@ onUnmounted(() => {
                 v-if="phoneNumberError"
                 id="phoneNumber-error"
                 role="alert"
-                class="mt-2 text-xs font-medium text-red-600"
+                class="mt-2 text-[12px] phone:text-[14px] font-medium text-red-600"
               >
                 {{ phoneNumberError }}
               </p>
 
-              <p class="mt-2 text-xs text-stone-500">
+              <p class="mt-2 text-[12px] phone:text-[14px] text-stone-500">
                 Optional. Leave empty to remove your phone number.
               </p>
             </div>
+
+            <!-- Fixed Save Button -->
+            <div class="shrink-0">
+              <button
+                type="submit"
+                form="edit-profile-form"
+                :disabled="isSubmitting || isLoadingProfile"
+                class="flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-4 py-3.5 text-[14px] phone:text-[16px] font-bold text-stone-900 shadow-sm transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Save :size="19" />
+
+                {{
+                  isLoadingProfile
+                    ? 'Loading Profile...'
+                    : isSubmitting
+                      ? 'Saving Changes...'
+                      : 'Save Changes'
+                }}
+              </button>
+            </div>
           </form>
-        </div>
-
-        <!-- Fixed Save Button -->
-        <div class="shrink-0">
-          <button
-            type="submit"
-            form="edit-profile-form"
-            :disabled="isSubmitting || isLoadingProfile"
-            class="flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-4 py-3.5 text-sm font-bold text-stone-900 shadow-sm transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Save :size="19" />
-
-            {{
-              isLoadingProfile
-                ? 'Loading Profile...'
-                : isSubmitting
-                  ? 'Saving Changes...'
-                  : 'Save Changes'
-            }}
-          </button>
         </div>
       </div>
     </div>
@@ -443,7 +439,7 @@ onUnmounted(() => {
           Profile Updated!
         </h2>
 
-        <p class="mt-2 text-sm text-stone-600">
+        <p class="mt-2 text-[14px] phone:text-[16px] text-stone-600">
           Your profile information has been saved successfully.
         </p>
 

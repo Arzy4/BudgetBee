@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import {
+  Bell,
+  BellOff,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDown,
+} from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { useTransactionStore } from '@/stores/transactions'
 import { Doughnut } from 'vue-chartjs'
@@ -18,75 +26,55 @@ ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 
 const transactionStore = useTransactionStore()
 
+const isNotificationOpen = ref(false)
+
+// Temporary value until we connect the notification API
+const unreadNotificationCount = ref(0)
+
+const toggleNotification = () => {
+  isNotificationOpen.value = !isNotificationOpen.value
+}
+
+const closeNotification = () => {
+  isNotificationOpen.value = false
+}
+
 const { selectedMonth, monthlyTransactions } = storeToRefs(transactionStore)
-const isMonthDropdownOpen = ref(false)
-
-const months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-]
-
-const parseSelectedMonth = () => {
+/* Month display */
+const formattedMonth = computed(() => {
   const [year, month] = selectedMonth.value.split('-').map(Number)
 
-  const now = new Date()
+  const date = new Date(Date.UTC(year!, month! - 1, 1))
 
-  return {
-    year: year && year > 0 ? year : now.getFullYear(),
-    month: month && month >= 1 && month <= 12
-      ? month
-      : now.getMonth() + 1,
-  }
-}
-
-const initialPeriod = parseSelectedMonth()
-
-const temporaryMonth = ref(initialPeriod.month)
-const temporaryYear = ref(initialPeriod.year)
-
-const selectedPeriodLabel = computed(() => {
-  const { year, month } = parseSelectedMonth()
-
-  return `${months[month - 1]} ${year}`
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
 })
 
-const openMonthDropdown = () => {
-  const { year, month } = parseSelectedMonth()
+/* Previous month */
+const previousMonth = () => {
+  const [year, month] = selectedMonth.value.split('-').map(Number)
 
-  temporaryMonth.value = month
-  temporaryYear.value = year
+  const date = new Date(Date.UTC(year!, month! - 2, 1))
 
-  isMonthDropdownOpen.value = true
+  selectedMonth.value = [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, '0'),
+  ].join('-')
 }
 
-const closeMonthDropdown = () => {
-  isMonthDropdownOpen.value = false
-}
+/* Next month */
+const nextMonth = () => {
+  const [year, month] = selectedMonth.value.split('-').map(Number)
 
-const toggleMonthDropdown = () => {
-  if (isMonthDropdownOpen.value) {
-    closeMonthDropdown()
-  } else {
-    openMonthDropdown()
-  }
-}
+  const date = new Date(Date.UTC(year!, month!, 1))
 
-const applyMonth = () => {
-  const month = String(temporaryMonth.value).padStart(2, '0')
-
-  selectedMonth.value = `${temporaryYear.value}-${month}`
-
-  closeMonthDropdown()
+  selectedMonth.value = [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, '0'),
+  ].join('-')
 }
 
 const totalIncome = computed(() => {
@@ -206,138 +194,102 @@ const chartOptions: ChartOptions<'doughnut'> = {
 </script>
 
 <template>
-  <section class="w-full">
-    <!-- Header -->
-    <div class="mb-5 flex items-start justify-between gap-3">
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight text-stone-900">Financial Overview</h1>
+  <section class="flex h-full min-h-0 w-full flex-col">
+    <!-- Header and Month Navigation -->
+    <div class="mb-3 flex flex-col gap-2 sm:mb-4 sm:gap-3">
+      <!-- Dashboard Header -->
+      <header class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-[20px] phone:text-[24px] font-bold leading-tight text-stone-900">
+            Financial Overview
+          </h1>
 
-        <p class="text-sm text-stone-500 max-w-[90%]">Here's your income and expenses this month</p>
-      </div>
+          <p class="mt-1 text-[11px] phone:text-[12px] leading-4 text-stone-500 sm:text-sm">
+            Here's your income and expenses this month
+          </p>
+        </div>
 
-      <!-- Custom Month Selector -->
-      <div class="relative shrink-0">
+        <!-- Notification Button -->
         <button
           type="button"
-          aria-label="Select financial overview month"
-          :aria-expanded="isMonthDropdownOpen"
-          class="flex items-center gap-2 rounded-full bg-white/50 px-3 py-2 text-xs font-semibold text-stone-800 shadow-sm backdrop-blur-md transition-colors hover:bg-amber-100"
-          @click="isMonthDropdownOpen ? closeMonthDropdown() : openMonthDropdown()"
+          aria-label="Open notifications"
+          :aria-expanded="isNotificationOpen"
+          aria-haspopup="dialog"
+          class="relative flex h-11 w-11 phone:h-12 phone:w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm transition-all hover:bg-amber-200 active:scale-95"
+          @click="toggleNotification"
         >
-          <CalendarDays :size="15" class="shrink-0 text-amber-700" />
+          <Bell class="size-[22px] phone:size-[28px]" :stroke-width="1.9" />
 
-          <span class="whitespace-nowrap">
-            {{ selectedPeriodLabel }}
+          <span
+            v-if="unreadNotificationCount > 0"
+            class="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
+          >
+            {{ unreadNotificationCount > 9 ? '9+' : unreadNotificationCount }}
           </span>
-
-          <ChevronDown
-            :size="15"
-            class="shrink-0 text-amber-700 transition-transform"
-            :class="isMonthDropdownOpen ? 'rotate-180' : ''"
-          />
         </button>
+      </header>
+    </div>
 
-        <!-- Dropdown Panel -->
-        <div
-          v-if="isMonthDropdownOpen"
-          class="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/80 bg-[#FFF8ED] p-4 shadow-xl"
-        >
-          <!-- Year Navigation -->
-          <div class="mb-4 flex items-center justify-between">
-            <button
-              type="button"
-              aria-label="Previous year"
-              class="rounded-xl bg-white p-2 text-amber-700 hover:bg-amber-100"
-              @click="temporaryYear--"
-            >
-              <ChevronLeft :size="18" />
-            </button>
+    <!-- Month Navigation -->
+    <div class="mb-3 flex h-10 items-center justify-between px-4 sm:px-8">
+      <button
+        type="button"
+        aria-label="Previous month"
+        class="flex h-10 w-10 items-center justify-center rounded-full text-stone-500 hover:bg-white/60"
+        @click="previousMonth"
+      >
+        <ChevronLeft class="size-[21px] phone:size-[25px]" />
+      </button>
 
-            <span class="text-sm font-bold text-stone-800">
-              {{ temporaryYear }}
-            </span>
+      <h2 class="text-center text-[14px] phone:text-[16px] font-semibold text-stone-700">
+        {{ formattedMonth }}
+      </h2>
 
-            <button
-              type="button"
-              aria-label="Next year"
-              class="rounded-xl bg-white p-2 text-amber-700 hover:bg-amber-100"
-              @click="temporaryYear++"
-            >
-              <ChevronRight :size="18" />
-            </button>
-          </div>
-
-          <!-- Month Grid -->
-          <div class="grid grid-cols-3 gap-2">
-            <button
-              v-for="(month, index) in months"
-              :key="month"
-              type="button"
-              class="rounded-xl px-2 py-3 text-xs font-medium transition-colors"
-              :class="
-                temporaryMonth === index + 1
-                  ? 'bg-[#FFBA08] font-bold text-stone-900'
-                  : 'bg-white text-stone-600 hover:bg-amber-100'
-              "
-              @click="temporaryMonth = index + 1"
-            >
-              {{ month.slice(0, 3) }}
-            </button>
-          </div>
-
-          <!-- Actions -->
-          <div class="mt-5 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              class="rounded-full border border-stone-200 bg-white py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50"
-              @click="closeMonthDropdown"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              class="rounded-full bg-[#FFBA08] py-2.5 text-xs font-bold text-stone-900 hover:bg-amber-400"
-              @click="applyMonth"
-            >
-              Apply
-            </button>
-          </div>
-        </div>
-      </div>
+      <button
+        type="button"
+        aria-label="Next month"
+        class="flex h-10 w-10 items-center justify-center rounded-full text-stone-500 hover:bg-white/60"
+        @click="nextMonth"
+      >
+        <ChevronRight class="size-[21pxpx] phone:size-[25px]" />
+      </button>
     </div>
 
     <!-- Overview Card -->
     <div
-      class="rounded-3xl border border-white/40 bg-white/40 p-4 shadow-lg shadow-amber-900/5 backdrop-blur-md h-[45svh]"
+      class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-white/40 bg-white/40 px-4 pt-3 pb-4 shadow-lg shadow-amber-900/5 backdrop-blur-md sm:px-5 sm:pt-4 sm:pb-5"
     >
       <!-- Income and Expenses -->
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex items-center gap-2">
+      <div class="grid shrink-0 grid-cols-2 gap-8 sm:gap-10 justify-items-center pb-2">
+        <div class="flex min-w-0 items-center gap-2">
           <div
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600"
+            class="flex h-7 w-7 phone:h-9 phone:w-9 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600"
           >
-            ↓
+            <ArrowDown class="size-[14px] phone:size-[16px]" />
           </div>
 
-          <div>
-            <p class="text-xs text-stone-500">Total Income</p>
-            <p class="text-base font-bold text-emerald-600">
+          <div class="min-w-0">
+            <p class="text-[10px] phone:text-[11px] text-stone-500">Total Income</p>
+            <p
+              class="break-words text-[12px] phone:text-[14px] font-bold leading-tight text-emerald-600"
+            >
               {{ formatCurrency(totalIncome) }}
             </p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex min-w-0 items-center gap-2">
           <div
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500"
+            class="flex h-7 w-7 phone:h-9 phone:w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500"
           >
-            ↗
+            <ArrowUpRight class="size-[14px] phone:size-[16px]" />
           </div>
 
-          <div>
-            <p class="text-xs text-stone-500">Total Expenses</p>
-            <p class="text-base font-bold text-red-500">
+          <div class="min-w-0">
+            <p class="text-[10px] phone:text-[11px] text-stone-500">Total Expenses</p>
+            <p
+              class="break-words text-[12px] phone:text-[14px] font-bold leading-tight text-red-500"
+            >
               {{ formatCurrency(totalExpenses) }}
             </p>
           </div>
@@ -345,7 +297,9 @@ const chartOptions: ChartOptions<'doughnut'> = {
       </div>
 
       <!-- Doughnut Chart -->
-      <div class="relative mx-auto mt-2 h-50 w-50">
+      <div
+        class="relative mx-auto mt-2 h-[170px] w-[170px] shrink-0 phone:h-[200px] phone:w-[200px]"
+      >
         <Doughnut v-if="totalExpenses > 0" :data="chartData" :options="chartOptions" />
 
         <div v-else class="absolute inset-0 rounded-full border-24 border-[#F3E9D7]/70"></div>
@@ -354,11 +308,13 @@ const chartOptions: ChartOptions<'doughnut'> = {
         <div
           class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center"
         >
-          <p class="text-xs text-stone-500">Net Income</p>
+          <p class="text-[12px] phone:text-[14px] text-stone-500">Net Income</p>
 
           <div class="mt-1 flex items-center justify-center gap-1.5">
             <!-- Net Income Amount -->
-            <p class="text-sm font-bold text-stone-900">
+            <p
+              class="max-w-[110px] break-words text-center text-[11px] phone:text-[12px] font-bold leading-tight text-stone-900 sm:max-w-[140px] sm:text-sm"
+            >
               {{ formatCurrency(netIncome) }}
             </p>
 
@@ -378,30 +334,113 @@ const chartOptions: ChartOptions<'doughnut'> = {
       </div>
 
       <!-- Category Breakdown -->
-      <div class="mt-4 flex flex-wrap justify-center gap-x-3 gap-y-4 px-2">
+      <div class="mt-2 flex min-h-0 flex-1 flex-col justify-start overflow-hidden pt-2">
+        <!-- Category List -->
         <div
-          v-for="category in categories"
-          :key="category.name"
-          class="flex max-w-[120px] min-w-0 flex-col items-center gap-1 text-center"
+          class="grid max-h-full grid-cols-3 gap-x-2 gap-y-3 overflow-y-auto overscroll-contain px-1 pb-3 sm:grid-cols-4"
         >
-          <!-- Category Name -->
-          <div class="flex min-w-0 max-w-full items-center justify-center gap-1.5">
-            <span
-              class="h-2.5 w-2.5 shrink-0 rounded-full"
-              :style="{ backgroundColor: category.color }"
-            ></span>
+          <div
+            v-for="category in categories"
+            :key="category.name"
+            class="flex min-w-0 flex-col items-center gap-1 text-center"
+          >
+            <!-- Category Name -->
+            <div class="flex min-w-0 max-w-full items-center justify-center gap-1">
+              <span
+                class="h-2 w-2 shrink-0 rounded-full"
+                :style="{ backgroundColor: category.color }"
+              ></span>
 
-            <span class="min-w-0 break-words text-[10px] leading-tight font-medium text-stone-500">
-              {{ category.name }}
-            </span>
+              <span
+                class="min-w-0 break-words text-[9px] phone:text-[10px] font-medium leading-tight text-stone-500"
+              >
+                {{ category.name }}
+              </span>
+            </div>
+
+            <!-- Category Amount -->
+            <p
+              class="max-w-full break-words text-[9px] phone:text-[10px] font-semibold leading-tight text-stone-800 sm:text-[10px]"
+            >
+              {{ formatCurrency(category.amount) }}
+            </p>
           </div>
-
-          <!-- Category Amount -->
-          <p class="max-w-full break-words text-[10px] leading-tight font-semibold text-stone-800">
-            {{ formatCurrency(category.amount) }}
-          </p>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Notification Center Modal -->
+  <Teleport to="body">
+    <div
+      v-if="isNotificationOpen"
+      class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
+      @click.self="closeNotification"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="notification-title"
+        class="flex w-full max-w-md flex-col overflow-hidden rounded-[24px] bg-[#FFF9ED] shadow-2xl"
+        style="max-height: min(80dvh, 600px)"
+      >
+        <!-- Header -->
+        <div class="flex shrink-0 items-center justify-between border-b border-amber-100 px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700"
+            >
+              <Bell :size="21" />
+            </div>
+
+            <div>
+              <h2 id="notification-title" class="text-[17px] font-bold text-stone-900">
+                Notification Center
+              </h2>
+
+              <p class="text-xs text-stone-500">Stay updated with your finances</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Close notifications"
+            class="flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition hover:bg-amber-100"
+            @click="closeNotification"
+          >
+            <X :size="20" />
+          </button>
+        </div>
+
+        <!-- Notification Content -->
+        <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+          <!-- Empty State -->
+          <div class="flex flex-col items-center justify-center py-12 text-center">
+            <div
+              class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600"
+            >
+              <BellOff :size="28" :stroke-width="1.7" />
+            </div>
+
+            <h3 class="text-[15px] font-semibold text-stone-800">No notifications yet</h3>
+
+            <p class="mt-2 max-w-[240px] text-xs leading-5 text-stone-500">
+              You're all caught up! Your budget alerts and important updates will appear here.
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="shrink-0 border-t border-amber-100 px-5 py-4">
+          <button
+            type="button"
+            class="w-full rounded-xl bg-amber-400 py-3 text-sm font-semibold text-stone-900 transition hover:bg-amber-500 active:scale-[0.98]"
+            @click="closeNotification"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>

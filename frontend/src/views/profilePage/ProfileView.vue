@@ -7,7 +7,7 @@ import {
   ReceiptText,
   LockKeyhole,
   Bell,
-  Palette,
+  Database,
   ChevronRight,
   LogOut,
 } from 'lucide-vue-next'
@@ -27,23 +27,27 @@ const totalTransactions = ref<number | null>(null)
 const settings = [
   {
     label: 'Edit Profile',
+    describe: 'Personal Information',
     icon: UserRoundPen,
     route: '/profile/edit',
   },
   {
     label: 'Change Password',
+    describe: 'Account Security',
     icon: LockKeyhole,
     route: '/profile/change-password',
   },
   {
     label: 'Notifications',
+    describe: 'Notification Preferences',
     icon: Bell,
-    route: null,
+    route: '/profile/notifications',
   },
   {
-    label: 'Appearance',
-    icon: Palette,
-    route: null,
+    label: 'Data Management',
+    describe: 'Charts, Exports and Financial Records',
+    icon: Database,
+    route: '/profile/data-management',
   },
 ]
 
@@ -104,48 +108,53 @@ function handleSettingClick(route: string | null) {
 
 <template>
   <main
-    class="relative min-h-screen w-full px-5 pt-9 flex h-dvh w-full flex-col overflow-hidden"
+    class="relative h-dvh w-full overflow-hidden px-4 pt-8 pb-[calc(80px+env(safe-area-inset-bottom)+16px)] phone:px-6 phone:pt-10 phone:pb-[calc(80px+env(safe-area-inset-bottom)+20px)]"
   >
-    <div class="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col">
+    <div
+      class="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col gap-3 phone:gap-4 sm:gap-5"
+    >
       <!-- Fixed Header -->
-      <header class="mb-4 shrink-0">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-bold tracking-tight text-stone-900">My Profile</h1>
+      <header class="flex shrink-0 items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-[20px] font-bold leading-tight text-stone-800 phone:text-[24px]">
+            My Profile
+          </h1>
 
-            <p class="mt-1 text-xs text-stone-500">Manage your account and preferences</p>
-          </div>
+          <p class="mt-1 text-[11px] leading-5 text-stone-500 phone:text-[12px]">
+            Manage your account and preferences
+          </p>
+        </div>
 
-          <div
-            class="flex p-3 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm"
-          >
-            <Settings :size="22" />
-          </div>
+        <div
+          class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm xs:size-11 phone:size-12"
+        >
+          <Settings class="size-[22px] text-amber-600 phone:size-[28px]" :stroke-width="1.9" />
         </div>
       </header>
 
       <!-- Scrollable Profile Content -->
-      <div class="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain pb-28">
+      <div
+        class="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pb-3 phone:space-y-6 phone:pb-4"
+      >
         <!-- Profile Error Message -->
         <div
           v-if="errorMessage"
           role="alert"
-          class="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center"
+          class="rounded-2xl border border-red-200 bg-red-50 px-3 py-3 text-center phone:px-4"
         >
-          <p class="text-sm font-medium text-red-600">
+          <p class="text-[12px] font-medium text-red-600 phone:text-[14px]">
             {{ errorMessage }}
           </p>
         </div>
 
         <!-- User Information -->
         <section
-          class="flex flex-col items-center rounded-3xl border border-white/80 bg-white/20 px-5 py-7 text-center shadow-sm backdrop-blur-sm"
+          class="flex flex-col items-center rounded-3xl border border-white/80 bg-white/20 px-4 py-5 text-center shadow-sm backdrop-blur-sm phone:px-5 phone:py-7"
         >
           <!-- Avatar -->
           <div
-            class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-amber-400"
+            class="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-amber-400 phone:size-24"
           >
-            <!-- Display uploaded profile picture -->
             <img
               v-if="authStore.user?.profileImage"
               :src="authStore.user.profileImage"
@@ -153,57 +162,62 @@ function handleSettingClick(route: string | null) {
               class="h-full w-full object-cover"
             />
 
-            <!-- Display default avatar if no image exists -->
-            <UserRound v-else :size="44" :stroke-width="1.7" class="text-stone-900" />
+            <UserRound v-else class="size-10 text-stone-900 phone:size-11" :stroke-width="1.7" />
           </div>
 
           <!-- Full Name -->
-          <h2 class="mt-4 text-xl font-bold text-stone-900">
+          <h2
+            class="mt-3 max-w-full break-words text-[18px] font-bold text-stone-900 phone:mt-4 phone:text-[20px]"
+          >
             {{ isLoading ? 'Loading...' : (user?.fullName ?? 'Your Name') }}
           </h2>
 
           <!-- Email -->
-          <p class="mt-1 max-w-full break-all text-sm text-stone-500">
+          <p class="mt-1 max-w-full break-all text-[12px] text-stone-500 phone:text-[14px]">
             {{ isLoading ? 'Loading...' : (user?.email ?? 'No email available') }}
           </p>
 
           <!-- Membership Badge -->
           <span
-            class="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-xs font-bold text-amber-700"
+            class="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-2 text-[11px] font-bold text-amber-700 phone:mt-4 phone:px-4 phone:text-[12px]"
           >
-            <UserRound :size="14" />
+            <UserRound class="size-[13px] phone:size-[14px]" />
             BudgetBee Member
           </span>
         </section>
 
         <!-- Account Summary -->
-        <section class="grid grid-cols-2 gap-3">
+        <section class="grid grid-cols-2 gap-2 phone:gap-3">
           <!-- Member Since -->
           <div
-            class="flex min-w-0 flex-col rounded-3xl border border-white/80 bg-white/20 p-4 shadow-sm backdrop-blur-sm"
+            class="flex min-w-0 flex-col rounded-3xl border border-white/80 bg-white/20 p-3 shadow-sm backdrop-blur-sm phone:p-4"
           >
-            <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-              <CalendarDays :size="22" class="text-amber-600" />
+            <div
+              class="mb-3 flex size-9 items-center justify-center rounded-xl bg-amber-100 phone:size-10"
+            >
+              <CalendarDays class="size-[20px] text-amber-600 phone:size-[22px]" />
             </div>
 
-            <p class="text-xs text-stone-400">Member Since</p>
+            <p class="text-[11px] text-stone-400 phone:text-[12px]">Member Since</p>
 
-            <p class="mt-1 break-words text-sm font-bold text-stone-900">
+            <p class="mt-1 break-words text-[12px] font-bold text-stone-900 phone:text-[14px]">
               {{ isLoading ? 'Loading...' : memberSince }}
             </p>
           </div>
 
           <!-- Total Transactions -->
           <div
-            class="flex min-w-0 flex-col rounded-3xl border border-white/80 bg-white/20 p-4 shadow-sm backdrop-blur-sm"
+            class="flex min-w-0 flex-col rounded-3xl border border-white/80 bg-white/20 p-3 shadow-sm backdrop-blur-sm phone:p-4"
           >
-            <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-              <ReceiptText :size="22" class="text-amber-600" />
+            <div
+              class="mb-3 flex size-9 items-center justify-center rounded-xl bg-amber-100 phone:size-10"
+            >
+              <ReceiptText class="size-[20px] text-amber-600 phone:size-[22px]" />
             </div>
 
-            <p class="text-xs text-stone-400">Transactions</p>
+            <p class="text-[11px] text-stone-400 phone:text-[12px]">Transactions</p>
 
-            <p class="mt-1 break-words text-sm font-bold text-stone-900">
+            <p class="mt-1 break-words text-[12px] font-bold text-stone-900 phone:text-[14px]">
               {{
                 isLoading
                   ? 'Loading...'
@@ -217,32 +231,40 @@ function handleSettingClick(route: string | null) {
 
         <!-- Account Settings -->
         <section>
-          <h3 class="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#918A7E]">
+          <h3
+            class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#918A7E] phone:mb-4 phone:text-[11px]"
+          >
             Account Settings
           </h3>
 
           <div
-            class="overflow-hidden rounded-3xl border border-white/80 bg-white/20 px-4 shadow-sm backdrop-blur-sm"
+            class="overflow-hidden rounded-3xl border border-white/80 bg-white/20 px-3 shadow-sm backdrop-blur-sm phone:px-4"
           >
             <button
               v-for="(item, index) in settings"
               :key="item.label"
               type="button"
-              class="flex w-full items-center gap-3 py-4 text-left transition-colors hover:bg-white/30"
+              class="flex w-full items-center gap-2 py-3 text-left transition-colors hover:bg-white/30 phone:gap-3 phone:py-4"
               :class="index !== settings.length - 1 ? 'border-b border-[#F0E9E0]' : ''"
               @click="handleSettingClick(item.route)"
             >
               <span
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF5DB]"
+                class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#FFF5DB] phone:size-10"
               >
-                <component :is="item.icon" :size="20" class="text-[#C9900B]" />
+                <component :is="item.icon" class="size-[18px] text-[#C9900B] phone:size-[20px]" />
               </span>
 
-              <span class="flex-1 text-sm font-semibold">
-                {{ item.label }}
-              </span>
+              <div class="flex min-w-0 flex-1 flex-col">
+                <span class="text-[12px] font-semibold phone:text-[14px]">
+                  {{ item.label }}
+                </span>
 
-              <ChevronRight :size="18" class="text-[#A9A29A]" />
+                <span class="text-[11px] text-stone-500 phone:text-[12px]">
+                  {{ item.describe }}
+                </span>
+              </div>
+
+              <ChevronRight class="ml-auto size-[16px] shrink-0 text-[#A9A29A] phone:size-[18px]" />
             </button>
           </div>
         </section>
@@ -250,16 +272,16 @@ function handleSettingClick(route: string | null) {
         <!-- Logout -->
         <button
           type="button"
-          class="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-100 px-4 py-4 text-sm font-bold text-red-600 transition-colors hover:bg-red-200"
+          class="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-100 px-4 py-3 text-[12px] font-bold text-red-600 transition-colors hover:bg-red-200 phone:py-4 phone:text-[14px]"
           @click="handleLogout"
         >
-          <LogOut :size="19" />
+          <LogOut class="size-[17px] phone:size-[19px]" />
           Log Out
         </button>
 
         <!-- Footer -->
-        <footer class="mt-auto pt-8 text-center">
-          <p class="text-xs text-[#A49B8E]">BudgetBee • Version 1.0</p>
+        <footer class="pt-4 text-center phone:pt-6">
+          <p class="text-[11px] text-[#A49B8E] phone:text-[12px]">BudgetBee • Version 1.0</p>
         </footer>
       </div>
     </div>

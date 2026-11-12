@@ -97,7 +97,7 @@ function formatCurrency(amount: number) {
   >
     <div class="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">
       <!-- Fixed header -->
-      <header class="mb-4 flex shrink-0 items-center gap-4">
+      <header class="flex shrink-0 items-center gap-4">
         <button
           type="button"
           aria-label="Go back"
@@ -114,7 +114,7 @@ function formatCurrency(amount: number) {
         <p
           v-if="submitError"
           role="alert"
-          class="mb-3 rounded-xl bg-red-50/90 px-4 py-3 text-sm text-red-700"
+          class="mb-3 rounded-xl bg-red-50/90 px-4 py-3 text-[14px] phone:text-[16px] text-red-700"
         >
           {{ submitError }}
         </p>
@@ -167,13 +167,13 @@ function formatCurrency(amount: number) {
             Transaction Saved!
           </h2>
 
-          <p class="mt-2 text-sm text-stone-600">Your transaction has been saved successfully!</p>
+          <p class="mt-2 text-[14px] phone:text-[16px] text-stone-600">Your transaction has been saved successfully!</p>
 
           <div
             v-if="submittedTransaction"
             class="mt-5 w-full rounded-2xl bg-white/60 p-4 text-left"
           >
-            <p class="text-sm font-semibold text-stone-900">
+            <p class="text-[14px] phone:text-[16px] font-semibold text-stone-900">
               {{ submittedTransaction.title }}
             </p>
 
@@ -181,7 +181,7 @@ function formatCurrency(amount: number) {
               {{ formatCurrency(submittedTransaction.amount) }}
             </p>
 
-            <p class="mt-1 text-xs text-stone-500">
+            <p class="mt-1 text-[12px] phone:text-[14px] text-stone-500">
               {{ submittedTransaction.type === 'EXPENSE' ? 'Expense' : 'Income' }}
             </p>
           </div>

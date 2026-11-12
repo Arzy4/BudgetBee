@@ -4,26 +4,20 @@ import { computed, ref, watch } from 'vue'
 
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import PageLayout from '@/layouts/PageLayout.vue'
+import { useNotificationBannerStore } from '@/stores/notificationBannerStore'
+import InAppNotificationBanner from '@/components/notifications/InAppNotificationBanner.vue'
 
 const route = useRoute()
 const direction = ref('fade')
+const bannerStore = useNotificationBannerStore()
 
 // Select layout
-const isAuthPage = computed(
-  () => route.meta.background === 'auth'
-)
+const isAuthPage = computed(() => route.meta.background === 'auth')
 
-const currentLayout = computed(() =>
-  isAuthPage.value ? AuthLayout : PageLayout
-)
+const currentLayout = computed(() => (isAuthPage.value ? AuthLayout : PageLayout))
 
 // Main navigation order
-const navigationOrder = [
-  '/dashboard',
-  '/budgets',
-  '/histories',
-  '/profile',
-]
+const navigationOrder = ['/dashboard', '/budgets', '/histories', '/profile']
 
 // Determine animation direction
 watch(
@@ -31,13 +25,18 @@ watch(
   (to, from) => {
     // Login → Register / Login → Forgot Password / Forgot Password → Password Form
     if (
-      from === '/login' && to === '/register' || from === '/login' && to === '/forgot-password') {
+      (from === '/login' && to === '/register') ||
+      (from === '/login' && to === '/forgot-password')
+    ) {
       direction.value = 'slide-left'
       return
     }
 
     // Register → Login
-    if (from === '/register' && to === '/login' || from === '/forgot-password' && to === '/login') {
+    if (
+      (from === '/register' && to === '/login') ||
+      (from === '/forgot-password' && to === '/login')
+    ) {
       direction.value = 'slide-right'
       return
     }
@@ -46,16 +45,13 @@ watch(
     const toIndex = navigationOrder.indexOf(to)
 
     if (fromIndex !== -1 && toIndex !== -1) {
-      direction.value =
-        toIndex > fromIndex
-          ? 'slide-left'
-          : 'slide-right'
+      direction.value = toIndex > fromIndex ? 'slide-left' : 'slide-right'
       return
     }
 
     direction.value = 'fade'
   },
-  { flush: 'sync' }
+  { flush: 'sync' },
 )
 </script>
 
@@ -64,16 +60,28 @@ watch(
     <RouterView v-slot="{ Component, route }">
       <div class="page-transition-container">
         <Transition :name="direction">
-          <div
-            :key="route.path"
-            class="page-transition-item"
-          >
+          <div :key="route.path" class="page-transition-item">
             <component :is="Component" />
           </div>
         </Transition>
       </div>
     </RouterView>
   </component>
+
+  <!-- Global in-app notification banner -->
+  <Transition name="notification-banner">
+    <div
+      v-if="bannerStore.notification"
+      :key="bannerStore.notification.id"
+      class="fixed inset-x-0 top-4 z-[9999] mx-auto w-full max-w-md px-4"
+    >
+      <InAppNotificationBanner
+        :title="bannerStore.notification.title"
+        :message="bannerStore.notification.message"
+        @close="bannerStore.dismissNotification()"
+      />
+    </div>
+  </Transition>
 </template>
 
 <style>
@@ -158,6 +166,32 @@ watch(
   width: 100%;
 }
 
+/* Notification Banner Animation */
+/* In-app notification banner animation */
+.notification-banner-enter-active,
+.notification-banner-leave-active {
+  transition:
+    opacity 250ms ease,
+    transform 250ms ease;
+}
+
+.notification-banner-enter-from,
+.notification-banner-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* Delete Modal Animation */
+.delete-modal-enter-active,
+.delete-modal-leave-active {
+  transition: opacity 200ms ease;
+}
+
+.delete-modal-enter-from,
+.delete-modal-leave-to {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .slide-left-enter-active,
   .slide-left-leave-active,
@@ -165,6 +199,16 @@ watch(
   .slide-right-leave-active,
   .fade-enter-active,
   .fade-leave-active {
+    transition: none;
+  }
+
+  .notification-banner-enter-active,
+  .notification-banner-leave-active {
+    transition: none;
+  }
+
+  .delete-modal-enter-active,
+  .delete-modal-leave-active {
     transition: none;
   }
 }

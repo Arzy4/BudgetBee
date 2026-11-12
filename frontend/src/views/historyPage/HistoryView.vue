@@ -385,41 +385,52 @@ const selectedPaymentMethodLabel = computed(
 
 <template>
   <main
-    class="relative w-full px-5 pt-9 pb-28 flex h-dvh flex-col overflow-hidden"
+    class="relative h-dvh w-full overflow-hidden px-4 pt-8 pb-[calc(80px+env(safe-area-inset-bottom)+16px)] phone:px-6 phone:pt-10 phone:pb-[calc(80px+env(safe-area-inset-bottom)+20px)]"
   >
-    <div class="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col gap-5">
+    <div
+      class="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col gap-3 phone:gap-4 sm:gap-5"
+    >
       <!-- Header -->
-      <header class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-stone-800">Transaction History</h1>
-          <p class="mt-1 text-sm text-stone-500">Track every transaction</p>
+      <header class="flex shrink-0 items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-[20px] font-bold leading-tight text-stone-800 phone:text-[24px]">
+            Transaction History
+          </h1>
+
+          <p class="mt-1 text-[11px] leading-5 text-stone-500 phone:text-[12px]">
+            Track every transaction
+          </p>
         </div>
 
-        <div class="flex p-3 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm">
-          <History :size="22" class="text-amber-700" />
+        <div
+          class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-sm xs:size-11 phone:size-12"
+        >
+          <History class="text-amber-600 size-[22px] phone:size-[28px]" :stroke-width="1.9"/>
         </div>
       </header>
 
       <!-- Search -->
-      <div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
-        <Search :size="19" class="shrink-0 text-stone-400" />
+      <div
+        class="flex shrink-0 items-center gap-2 rounded-2xl bg-white px-3 py-3 shadow-sm phone:gap-3 phone:px-4"
+      >
+        <Search class="size-[19px] shrink-0 text-stone-400 phone:size-[21px]" />
 
         <input
           v-model="searchQuery"
           type="search"
           placeholder="Search transactions..."
           aria-label="Search transactions"
-          class="min-w-0 flex-1 bg-transparent text-sm text-stone-800 outline-none placeholder:text-stone-400"
+          class="min-w-0 flex-1 bg-transparent text-[14px] text-stone-800 outline-none placeholder:text-stone-400 phone:text-[16px]"
         />
       </div>
 
       <!-- Quick Filters -->
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid shrink-0 grid-cols-3 gap-2 phone:gap-3">
         <button
           v-for="filter in filters"
           :key="filter.value"
           type="button"
-          class="rounded-full px-4 py-3 text-sm font-semibold transition-colors"
+          class="min-w-0 rounded-full px-2 py-2.5 text-[14px] font-semibold transition-colors phone:px-4 phone:py-3 phone:text-[16px]"
           :class="
             activeFilter === filter.value
               ? 'bg-[#FFBA08]/90 text-stone-900'
@@ -432,26 +443,26 @@ const selectedPaymentMethodLabel = computed(
       </div>
 
       <!-- Month and Filter Controls -->
-      <div class="flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-stone-700">
+      <div class="flex shrink-0 items-center justify-between gap-2">
+        <h2 class="min-w-0 text-[14px] font-semibold text-stone-700 phone:text-[16px]">
           {{ selectedPeriodLabel }}
         </h2>
 
-        <div class="flex items-center gap-2">
+        <div class="flex shrink-0 items-center gap-2">
           <button
             type="button"
             aria-label="Choose transaction dates"
-            class="rounded-xl bg-amber-100 p-2 text-amber-700"
+            class="flex size-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700 phone:size-10"
             @click="openCalendar"
           >
-            <CalendarDays :size="20" />
+            <CalendarDays class="size-[20px] phone:size-[22px]" />
           </button>
 
           <button
             type="button"
             aria-label="Advanced transaction filters"
             :aria-pressed="hasActiveAdvancedFilters"
-            class="relative rounded-xl p-2 transition-colors"
+            class="relative flex size-9 items-center justify-center rounded-xl transition-colors phone:size-10"
             :class="
               hasActiveAdvancedFilters
                 ? 'bg-[#FFBA08] text-stone-900'
@@ -459,7 +470,7 @@ const selectedPaymentMethodLabel = computed(
             "
             @click="openAdvancedFilters"
           >
-            <SlidersHorizontal :size="20" />
+            <SlidersHorizontal class="size-[20px] phone:size-[22px]" />
 
             <span
               v-if="hasActiveAdvancedFilters"
@@ -470,24 +481,26 @@ const selectedPaymentMethodLabel = computed(
       </div>
 
       <!-- Transaction List -->
-      <section class="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pb-4">
+      <section
+        class="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pb-3 phone:space-y-3 phone:pb-4"
+      >
         <!-- Loading State -->
-        <div v-if="isLoading" class="flex justify-center items-center h-full pb-12">
-          <p class="text-sm text-stone-500">Loading transactions...</p>
+        <div v-if="isLoading" class="flex h-full items-center justify-center pb-12">
+          <p class="text-[14px] text-stone-500 phone:text-[16px]">Loading transactions...</p>
         </div>
 
         <!-- Error State -->
         <div
           v-else-if="errorMessage"
-          class="rounded-2xl bg-white/40 p-8 text-center backdrop-blur-md"
+          class="rounded-2xl bg-white/40 p-4 text-center backdrop-blur-md phone:p-8"
         >
-          <p class="text-sm text-red-600">
+          <p class="text-[14px] text-red-600 phone:text-[16px]">
             {{ errorMessage }}
           </p>
 
           <button
             type="button"
-            class="mt-3 text-sm font-semibold text-amber-700"
+            class="mt-3 text-[14px] font-semibold text-amber-700 phone:text-[16px]"
             @click="fetchTransactions"
           >
             Try Again
@@ -497,9 +510,9 @@ const selectedPaymentMethodLabel = computed(
         <!-- Empty State -->
         <div
           v-else-if="filteredTransactions.length === 0"
-          class="flex justify-center items-center h-full pb-12"
+          class="flex h-full items-center justify-center pb-12"
         >
-          <p class="text-sm text-stone-500">No transactions found.</p>
+          <p class="text-[14px] text-stone-500 phone:text-[16px]">No transactions found.</p>
         </div>
 
         <!-- Transaction Cards -->
@@ -507,33 +520,36 @@ const selectedPaymentMethodLabel = computed(
           <article
             v-for="transaction in filteredTransactions"
             :key="transaction.id"
-            class="rounded-2xl bg-white/40 p-4 shadow-sm backdrop-blur-md"
+            class="rounded-2xl bg-white/40 p-3 shadow-sm backdrop-blur-md phone:p-4"
           >
             <!-- Transaction Information -->
-            <div class="flex items-center gap-3">
+            <div class="flex min-w-0 items-center gap-2 phone:gap-3">
+              <!-- Category Icon -->
               <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                class="flex size-10 shrink-0 items-center justify-center rounded-xl phone:size-12"
                 :class="transaction.type === 'INCOME' ? 'bg-green-100' : 'bg-amber-100'"
               >
                 <component
                   :is="getCategoryIcon(transaction.category)"
-                  :size="21"
+                  class="size-[19px] phone:size-[21px]"
                   :class="transaction.type === 'INCOME' ? 'text-green-700' : 'text-amber-600'"
                 />
               </div>
 
+              <!-- Transaction Title and Category -->
               <div class="min-w-0 flex-1">
-                <h3 class="truncate text-sm font-semibold text-stone-800">
+                <h3 class="truncate text-[12px] font-semibold text-stone-800 phone:text-[14px]">
                   {{ transaction.title }}
                 </h3>
 
-                <p class="mt-1 truncate text-xs text-stone-500">
+                <p class="mt-1 truncate text-[11px] text-stone-500 phone:text-[12px]">
                   {{ transaction.category }}
                 </p>
               </div>
 
+              <!-- Transaction Amount -->
               <p
-                class="shrink-0 text-right text-sm font-semibold"
+                class="max-w-[48%] shrink-0 break-words text-right text-[12px] font-semibold leading-tight phone:text-[14px]"
                 :class="transaction.type === 'INCOME' ? 'text-green-700' : 'text-red-600'"
               >
                 {{ transaction.type === 'INCOME' ? '+' : '−'
@@ -544,18 +560,18 @@ const selectedPaymentMethodLabel = computed(
             <div class="my-3 border-t border-stone-100"></div>
 
             <!-- Date and See Details -->
-            <div class="flex items-center justify-between gap-3">
-              <p class="text-xs text-stone-400">
+            <div class="flex items-center justify-between gap-2 phone:gap-3">
+              <p class="min-w-0 text-[12px] text-stone-400 phone:text-[14px]">
                 {{ formatDate(transaction.date) }}
               </p>
 
               <button
                 type="button"
-                class="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800"
+                class="flex shrink-0 items-center gap-1 text-[11px] font-semibold text-amber-700 hover:text-amber-800 phone:text-[12px]"
                 @click="openTransactionDetails(transaction)"
               >
                 See Details
-                <ChevronRight :size="16" />
+                <ChevronRight class="size-[11px] phone:size-[12px]" />
               </button>
             </div>
           </article>
@@ -567,17 +583,17 @@ const selectedPaymentMethodLabel = computed(
   <!-- Transaction Details Modal -->
   <div
     v-if="selectedTransaction"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 phone:px-4"
     @click.self="closeTransactionDetails"
   >
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="transaction-details-title"
-      class="w-full max-w-md rounded-3xl bg-[#FFF8ED] p-5 shadow-xl"
+      class="max-h-[85dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-[22px] bg-[#FFF8ED] p-3 shadow-xl phone:rounded-3xl phone:p-5"
     >
       <div class="mb-5 flex items-center justify-between">
-        <h2 id="transaction-details-title" class="text-lg font-bold text-stone-900">
+        <h2 id="transaction-details-title" class="text-[18px] phone:text-[20px] font-bold text-stone-900">
           Transaction Details
         </h2>
 
@@ -594,48 +610,48 @@ const selectedPaymentMethodLabel = computed(
       <!-- Amount -->
       <div class="mb-5 text-center">
         <p
-          class="text-2xl font-bold"
+          class="text-[24px] phone:text-[30px] font-bold"
           :class="selectedTransaction.type === 'INCOME' ? 'text-green-700' : 'text-red-600'"
         >
           {{ selectedTransaction.type === 'INCOME' ? '+' : '−'
           }}{{ formatCurrency(selectedTransaction.amount) }}
         </p>
 
-        <p class="mt-2 text-sm font-semibold text-stone-800">
+        <p class="mt-2 text-[14px] phone:text-[16px] font-semibold text-stone-800">
           {{ selectedTransaction.title }}
         </p>
       </div>
 
       <div class="space-y-4 border-t border-stone-200 pt-4">
-        <div class="flex justify-between gap-4 text-sm">
+        <div class="flex justify-between gap-4 text-[14px] phone:text-[16px]">
           <span class="text-stone-500">Category</span>
           <span class="text-right font-medium text-stone-800">
             {{ selectedTransaction.category }}
           </span>
         </div>
 
-        <div class="flex justify-between gap-4 text-sm">
+        <div class="flex justify-between gap-4 text-[14px] phone:text-[16px]">
           <span class="text-stone-500">Type</span>
           <span class="font-medium text-stone-800">
             {{ selectedTransaction.type }}
           </span>
         </div>
 
-        <div class="flex justify-between gap-4 text-sm">
+        <div class="flex justify-between gap-4 text-[14px] phone:text-[16px]">
           <span class="text-stone-500">Date</span>
           <span class="text-right font-medium text-stone-800">
             {{ formatDate(selectedTransaction.date) }}
           </span>
         </div>
 
-        <div class="flex justify-between gap-4 text-sm">
+        <div class="flex justify-between gap-4 text-[14px] phone:text-[16px]">
           <span class="text-stone-500">Payment Method</span>
           <span class="text-right font-medium text-stone-800">
             {{ formatPaymentMethod(selectedTransaction.paymentMethod) }}
           </span>
         </div>
 
-        <div class="flex justify-between gap-4 text-sm">
+        <div class="flex justify-between gap-4 text-[14px] phone:text-[16px]">
           <span class="text-stone-500">Description</span>
           <span class="max-w-[60%] text-right font-medium break-words text-stone-800">
             {{ selectedTransaction.description || 'No description' }}
@@ -645,7 +661,7 @@ const selectedPaymentMethodLabel = computed(
 
       <button
         type="button"
-        class="mt-6 w-full rounded-full bg-[#FFBA08] py-3 text-sm font-semibold text-stone-900 hover:bg-amber-400"
+        class="mt-6 w-full rounded-full bg-[#FFBA08] py-3 text-[14px] phone:text-[16px] font-semibold text-stone-900 hover:bg-amber-400"
         @click="closeTransactionDetails"
       >
         Close Details
@@ -656,21 +672,21 @@ const selectedPaymentMethodLabel = computed(
   <!-- Calendar Period Modal -->
   <div
     v-if="isCalendarOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 phone:px-4"
     @click.self="closeCalendar"
   >
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="calendar-modal-title"
-      class="w-full max-w-sm rounded-3xl bg-[#FFF8ED] p-5 shadow-xl"
+      class="w-full max-w-sm rounded-[22px] bg-[#FFF8ED] p-3 shadow-xl phone:rounded-3xl phone:p-5"
     >
       <!-- Header -->
       <div class="mb-6 flex items-center justify-between">
         <div>
-          <h2 id="calendar-modal-title" class="text-lg font-bold text-stone-900">Select Period</h2>
+          <h2 id="calendar-modal-title" class="text-[18px] phone:text-[20px] font-bold text-stone-900">Select Period</h2>
 
-          <p class="mt-1 text-xs text-stone-500">Choose a month and year to view transactions.</p>
+          <p class="mt-1 text-[12px] phone:text-[14px] text-stone-500">Choose a month and year to view transactions.</p>
         </div>
 
         <button
@@ -685,13 +701,13 @@ const selectedPaymentMethodLabel = computed(
 
       <!-- Month Selection -->
       <div class="relative mb-4">
-        <label class="mb-2 block text-sm font-medium text-stone-700"> Month </label>
+        <label class="mb-2 block text-[14px] phone:text-[16px] font-medium text-stone-700"> Month </label>
 
         <button
           type="button"
           aria-label="Select transaction month"
           :aria-expanded="activeDropdown === 'month'"
-          class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:border-amber-400"
+          class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-[14px] phone:text-[16px] font-medium text-stone-700 transition-colors hover:border-amber-400"
           @click="toggleDropdown('month')"
         >
           <span>{{ months[temporaryMonth - 1] }}</span>
@@ -705,17 +721,17 @@ const selectedPaymentMethodLabel = computed(
 
         <div
           v-if="activeDropdown === 'month'"
-          class="absolute inset-x-0 top-full z-50 mt-2 max-h-46 space-y-1 overflow-y-auto rounded-xl border border-amber-200 bg-[#FFF8ED] p-2 shadow-xl"
+          class="absolute inset-x-0 top-full z-50 mt-2 max-h-[min(184px,30dvh)] space-y-1 overflow-y-auto rounded-xl border border-amber-200 bg-[#FFF8ED] p-2 shadow-xl"
         >
           <button
             v-for="month in monthOptions"
             :key="month.value"
             type="button"
-            class="w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors"
+            class="w-full rounded-lg px-3 py-2.5 text-left text-[14px] phone:text-[16px] transition-colors"
             :class="
               temporaryMonth === month.value
                 ? 'bg-amber-100 font-semibold text-amber-800'
-                : 'truncate text-sm font-medium text-stone-700'
+                : 'truncate text-[14px] phone:text-[16px] font-medium text-stone-700'
             "
             @click="selectMonth(month.value)"
           >
@@ -726,13 +742,13 @@ const selectedPaymentMethodLabel = computed(
 
       <!-- Year Selection -->
       <div class="relative mb-6">
-        <label class="mb-2 block text-sm font-medium text-stone-700"> Year </label>
+        <label class="mb-2 block text-[14px] phone:text-[16px] font-medium text-stone-700"> Year </label>
 
         <button
           type="button"
           aria-label="Select transaction year"
           :aria-expanded="activeDropdown === 'year'"
-          class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:border-amber-400"
+          class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-[14px] phone:text-[16px] font-medium text-stone-700 transition-colors hover:border-amber-400"
           @click="toggleDropdown('year')"
         >
           <span>{{ temporaryYear }}</span>
@@ -746,17 +762,17 @@ const selectedPaymentMethodLabel = computed(
 
         <div
           v-if="activeDropdown === 'year'"
-          class="absolute inset-x-0 top-full z-50 mt-2 max-h-46 space-y-1 overflow-y-auto rounded-xl border border-amber-200 bg-[#FFF8ED] p-2 shadow-xl"
+          class="absolute inset-x-0 top-full z-50 mt-2 max-h-[min(184px,30dvh)] space-y-1 overflow-y-auto rounded-xl border border-amber-200 bg-[#FFF8ED] p-2 shadow-xl"
         >
           <button
             v-for="year in yearOptions"
             :key="year"
             type="button"
-            class="w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors"
+            class="w-full rounded-lg px-3 py-2.5 text-left text-[14px] phone:text-[16px] transition-colors"
             :class="
               temporaryYear === year
                 ? 'bg-amber-100 font-semibold text-amber-800'
-                : 'truncate text-sm font-medium text-stone-700'
+                : 'truncate text-[14px] phone:text-[16px] font-medium text-stone-700'
             "
             @click="selectYear(year)"
           >
@@ -769,7 +785,7 @@ const selectedPaymentMethodLabel = computed(
       <div class="grid grid-cols-2 gap-3">
         <button
           type="button"
-          class="rounded-full border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+          class="rounded-full border border-stone-200 bg-white py-3 text-[14px] phone:text-[16px] font-semibold text-stone-700 hover:bg-stone-50"
           @click="closeCalendar"
         >
           Cancel
@@ -777,7 +793,7 @@ const selectedPaymentMethodLabel = computed(
 
         <button
           type="button"
-          class="rounded-full bg-[#FFBA08] py-3 text-sm font-semibold text-stone-900 hover:bg-amber-400"
+          class="rounded-full bg-[#FFBA08] py-3 text-[14px] phone:text-[16px] font-semibold text-stone-900 hover:bg-amber-400"
           @click="applyPeriod"
         >
           Apply Period
@@ -789,22 +805,22 @@ const selectedPaymentMethodLabel = computed(
   <!-- Advanced Filters Modal -->
   <div
     v-if="isAdvancedFilterOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 phone:px-4"
     @click.self="closeAdvancedFilters"
   >
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="advanced-filters-title"
-      class="relative w-full max-w-sm overflow-visible rounded-3xl bg-[#FFF8ED] p-5 shadow-xl"
+      class="relative flex max-h-[85dvh] min-h-0 w-full max-w-sm flex-col rounded-[22px] bg-[#FFF8ED] p-3 shadow-xl phone:rounded-3xl phone:p-5"
     >
       <!-- Header -->
       <div class="mb-5 flex items-center justify-between">
         <div>
-          <h2 id="advanced-filters-title" class="text-lg font-bold text-stone-900">
+          <h2 id="advanced-filters-title" class="text-[18px] phone:text-[20px] font-bold text-stone-900">
             Advanced Filters
           </h2>
-          <p class="mt-1 text-xs text-stone-500">Refine your transaction history.</p>
+          <p class="mt-1 text-[12px] phone:text-[14px] text-stone-500">Refine your transaction history.</p>
         </div>
 
         <button
@@ -818,16 +834,16 @@ const selectedPaymentMethodLabel = computed(
       </div>
 
       <!-- Filter Fields -->
-      <div class="space-y-5 overflow-visible">
+      <div class="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pr-1 phone:space-y-5">
         <!-- Category -->
         <div class="relative">
-          <label class="mb-2 block text-sm font-medium text-stone-700"> Category </label>
+          <label class="mb-2 block text-[14px] phone:text-[16px] font-medium text-stone-700"> Category </label>
 
           <button
             type="button"
             aria-label="Select transaction category"
             :aria-expanded="activeDropdown === 'category'"
-            class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:border-amber-400"
+            class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-[14px] phone:text-[16px] font-medium text-stone-700 transition-colors hover:border-amber-400"
             @click="toggleDropdown('category')"
           >
             <span class="truncate">{{ selectedCategoryLabel }}</span>
@@ -847,7 +863,7 @@ const selectedPaymentMethodLabel = computed(
               v-for="category in categoryOptions"
               :key="category.value"
               type="button"
-              class="w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors"
+              class="w-full rounded-lg px-3 py-2.5 text-left text-[14px] phone:text-[16px] transition-colors"
               :class="
                 temporaryAdvancedFilters.category === category.value
                   ? 'bg-amber-100 font-semibold text-amber-800'
@@ -862,13 +878,13 @@ const selectedPaymentMethodLabel = computed(
 
         <!-- Payment Method -->
         <div class="relative">
-          <label class="mb-2 block text-sm font-medium text-stone-700"> Payment Method </label>
+          <label class="mb-2 block text-[14px] phone:text-[16px] font-medium text-stone-700"> Payment Method </label>
 
           <button
             type="button"
             aria-label="Select payment method"
             :aria-expanded="activeDropdown === 'paymentMethod'"
-            class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:border-amber-400"
+            class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-[14px] phone:text-[16px] font-medium text-stone-700 transition-colors hover:border-amber-400"
             @click="toggleDropdown('paymentMethod')"
           >
             <span class="truncate">{{ selectedPaymentMethodLabel }}</span>
@@ -888,7 +904,7 @@ const selectedPaymentMethodLabel = computed(
               v-for="method in paymentMethodOptions"
               :key="method.value"
               type="button"
-              class="w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors"
+              class="w-full rounded-lg px-3 py-2.5 text-left text-[14px] phone:text-[16px] transition-colors"
               :class="
                 temporaryAdvancedFilters.paymentMethod === method.value
                   ? 'bg-amber-100 font-semibold text-amber-800'
@@ -903,11 +919,11 @@ const selectedPaymentMethodLabel = computed(
 
         <!-- Amount Range -->
         <div>
-          <p class="mb-2 text-sm font-medium text-stone-700">Amount Range (IDR)</p>
+          <p class="mb-2 text-[14px] phone:text-[16px] font-medium text-stone-700">Amount Range (IDR)</p>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="filter-min-amount" class="mb-1 block text-xs text-stone-500">
+              <label for="filter-min-amount" class="mb-1 block text-[12px] phone:text-[14px] text-stone-500">
                 Minimum
               </label>
 
@@ -918,12 +934,12 @@ const selectedPaymentMethodLabel = computed(
                 min="0"
                 step="1"
                 placeholder="0"
-                class="w-full min-w-0 rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm font-medium text-stone-700 outline-none focus:border-amber-400"
+                class="w-full min-w-0 rounded-xl border border-stone-200 bg-white px-3 py-3 text-[14px] phone:text-[16px] font-medium text-stone-700 outline-none focus:border-amber-400"
               />
             </div>
 
             <div>
-              <label for="filter-max-amount" class="mb-1 block text-xs text-stone-500">
+              <label for="filter-max-amount" class="mb-1 block text-[12px] phone:text-[14px] text-stone-500">
                 Maximum
               </label>
 
@@ -934,22 +950,22 @@ const selectedPaymentMethodLabel = computed(
                 min="0"
                 step="1"
                 placeholder="No limit"
-                class="w-full min-w-0 rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm font-medium text-stone-700 outline-none focus:border-amber-400"
+                class="w-full min-w-0 rounded-xl border border-stone-200 bg-white px-3 py-3 text-[14px] phone:text-[16px] font-medium text-stone-700 outline-none focus:border-amber-400"
               />
             </div>
           </div>
         </div>
 
-        <p v-if="advancedFilterError" class="text-xs text-red-600">
+        <p v-if="advancedFilterError" class="text-[12px] phone:text-[14px] text-red-600">
           {{ advancedFilterError }}
         </p>
       </div>
 
       <!-- Actions -->
-      <div class="mt-6 grid shrink-0 grid-cols-2 gap-3">
+      <div class="mt-4 grid shrink-0 grid-cols-2 gap-2 phone:mt-6 phone:gap-3">
         <button
           type="button"
-          class="rounded-full border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+          class="rounded-full border border-stone-200 bg-white py-3 text-[14px] phone:text-[16px] font-semibold text-stone-700 hover:bg-stone-50"
           @click="resetAdvancedFilters"
         >
           Reset Filters
@@ -957,7 +973,7 @@ const selectedPaymentMethodLabel = computed(
 
         <button
           type="button"
-          class="rounded-full bg-[#FFBA08] py-3 text-sm font-semibold text-stone-900 hover:bg-amber-400"
+          class="rounded-full bg-[#FFBA08] py-3 text-[14px] phone:text-[16px] font-semibold text-stone-900 hover:bg-amber-400"
           @click="applyAdvancedFilters"
         >
           Apply Filters
