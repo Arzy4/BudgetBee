@@ -36,6 +36,10 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">#FFF8E7</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/budgetbee_native_splash</item>
+
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

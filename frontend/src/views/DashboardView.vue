@@ -1,14 +1,30 @@
 <script setup lang="ts">
 import FinancialOverview from '@/components/dashboard/FinancialOverview.vue'
 import RecentTransactions from '@/components/dashboard/RecentTransactions.vue'
-import { onMounted } from 'vue'
+
+import { watch } from 'vue'
 import { useTransactionStore } from '@/stores/transactions'
+import { useSplashStore } from '@/stores/splashStore'
 
 const transactionStore = useTransactionStore()
+const splashStore = useSplashStore()
 
-onMounted(() => {
-  void transactionStore.fetchTransactions()
-})
+// Fetch transactions when the splash has finished.
+// Also works when returning to Dashboard later.
+watch(
+  () => splashStore.isSplashComplete,
+  async (completed) => {
+
+    if (!completed) return
+
+    try {
+      await transactionStore.fetchTransactions()
+    } catch (error) {
+      console.error('[Dashboard] Transaction fetch failed:', error)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
